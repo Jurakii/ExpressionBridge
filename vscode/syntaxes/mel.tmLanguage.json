@@ -1,0 +1,154 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "MEL",
+  "scopeName": "source.mel",
+  "fileTypes": ["mel"],
+  "patterns": [{ "include": "#statements" }],
+  "repository": {
+    "statements": {
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#proc" },
+        { "include": "#strings" },
+        { "include": "#backtick" },
+        { "include": "#vector" },
+        { "include": "#keywords" },
+        { "include": "#types" },
+        { "include": "#builtins" },
+        { "include": "#variables" },
+        { "include": "#numbers" },
+        { "include": "#flags" },
+        { "include": "#attributes" },
+        { "include": "#calls" },
+        { "include": "#operators" },
+        { "include": "#punctuation" }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.mel",
+          "begin": "/\\*",
+          "end": "\\*/",
+          "beginCaptures": { "0": { "name": "punctuation.definition.comment.mel" } },
+          "endCaptures": { "0": { "name": "punctuation.definition.comment.mel" } }
+        },
+        {
+          "name": "comment.line.double-slash.mel",
+          "begin": "//",
+          "end": "$",
+          "beginCaptures": { "0": { "name": "punctuation.definition.comment.mel" } }
+        }
+      ]
+    },
+    "proc": {
+      "comment": "global proc float[] name(...)",
+      "match": "\\b(?:(global)\\s+)?(proc)\\s+(?:(int|float|string|vector|matrix)(\\[\\])?\\s+)?([A-Za-z_]\\w*)\\s*(?=\\()",
+      "captures": {
+        "1": { "name": "storage.modifier.mel" },
+        "2": { "name": "storage.type.function.mel" },
+        "3": { "name": "storage.type.mel" },
+        "4": { "name": "punctuation.definition.array.mel" },
+        "5": { "name": "entity.name.function.mel" }
+      }
+    },
+    "strings": {
+      "name": "string.quoted.double.mel",
+      "begin": "\"",
+      "end": "\"|$",
+      "beginCaptures": { "0": { "name": "punctuation.definition.string.begin.mel" } },
+      "endCaptures": { "0": { "name": "punctuation.definition.string.end.mel" } },
+      "patterns": [{ "name": "constant.character.escape.mel", "match": "\\\\." }]
+    },
+    "backtick": {
+      "comment": "Command substitution: `ls -sl`",
+      "name": "meta.embedded.command.mel",
+      "begin": "`",
+      "end": "`",
+      "beginCaptures": { "0": { "name": "punctuation.section.embedded.begin.mel" } },
+      "endCaptures": { "0": { "name": "punctuation.section.embedded.end.mel" } },
+      "patterns": [{ "include": "#statements" }]
+    },
+    "vector": {
+      "comment": "Vector literal: <<1, 2, 3>>",
+      "name": "meta.vector.mel",
+      "begin": "<<",
+      "end": ">>",
+      "beginCaptures": { "0": { "name": "punctuation.definition.vector.begin.mel" } },
+      "endCaptures": { "0": { "name": "punctuation.definition.vector.end.mel" } },
+      "patterns": [{ "include": "#statements" }]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.mel",
+          "match": "\\b(if|else|for|in|while|do|switch|case|default|break|continue|return)\\b"
+        },
+        { "name": "storage.modifier.mel", "match": "\\bglobal\\b" },
+        { "name": "constant.language.boolean.mel", "match": "\\b(true|false|on|off|yes|no)\\b" }
+      ]
+    },
+    "types": {
+      "name": "storage.type.mel",
+      "match": "\\b(int|float|string|vector|matrix)\\b"
+    },
+    "builtins": {
+      "comment": "Read-only variables available inside expressions.",
+      "name": "variable.language.mel",
+      "match": "\\b(time|frame)\\b(?!\\s*\\()"
+    },
+    "variables": {
+      "match": "(\\$)([A-Za-z_]\\w*)",
+      "captures": {
+        "0": { "name": "variable.other.mel" },
+        "1": { "name": "punctuation.definition.variable.mel" }
+      }
+    },
+    "numbers": {
+      "patterns": [
+        { "name": "constant.numeric.hex.mel", "match": "\\b0[xX][0-9A-Fa-f]+\\b" },
+        {
+          "name": "constant.numeric.decimal.mel",
+          "match": "(?<![\\w.])(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][+-]?\\d+)?(?![\\w.])"
+        }
+      ]
+    },
+    "flags": {
+      "comment": "Command flags: -query, -q. Only after whitespace or '(' so subtraction isn't matched.",
+      "match": "(?<=^|[\\s(,])(-)([A-Za-z][A-Za-z0-9]*)\\b",
+      "captures": {
+        "0": { "name": "variable.parameter.flag.mel" },
+        "1": { "name": "punctuation.definition.flag.mel" }
+      }
+    },
+    "attributes": {
+      "comment": "Expression attribute access: pCube1.translateY, |grp|obj.tx, obj.pnts[0].x",
+      "match": "(?<![\\w$.])((?:\\|?[A-Za-z_][\\w:]*)+)((?:\\.[A-Za-z_]\\w*(?:\\[\\d+\\])?)+)",
+      "captures": {
+        "1": { "name": "entity.name.type.node.mel" },
+        "2": { "name": "variable.other.member.attribute.mel" }
+      }
+    },
+    "calls": {
+      "match": "\\b([A-Za-z_]\\w*)\\s*(?=\\()",
+      "captures": { "1": { "name": "entity.name.function.call.mel" } }
+    },
+    "operators": {
+      "patterns": [
+        { "name": "keyword.operator.comparison.mel", "match": "==|!=|<=|>=|<|>" },
+        { "name": "keyword.operator.logical.mel", "match": "&&|\\|\\||!" },
+        { "name": "keyword.operator.assignment.compound.mel", "match": "\\+=|-=|\\*=|/=" },
+        { "name": "keyword.operator.increment.mel", "match": "\\+\\+|--" },
+        { "name": "keyword.operator.assignment.mel", "match": "=" },
+        { "name": "keyword.operator.arithmetic.mel", "match": "[+\\-*/%^]" },
+        { "name": "keyword.operator.ternary.mel", "match": "[?:]" }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        { "name": "punctuation.terminator.statement.mel", "match": ";" },
+        { "name": "punctuation.separator.comma.mel", "match": "," }
+      ]
+    }
+  }
+}

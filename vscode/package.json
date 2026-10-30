@@ -1,0 +1,140 @@
+{
+  "name": "maya-expressions",
+  "displayName": "Maya Expressions",
+  "description": "Browse and edit Maya expressions live from VS Code.",
+  "version": "0.1.2",
+  "publisher": "local",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onFileSystem:maya-expr"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "mayaExpressions",
+          "title": "Maya Expressions",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "mayaExpressions": [
+        {
+          "id": "mayaExpressions.tree",
+          "name": "Objects"
+        },
+        {
+          "type": "webview",
+          "id": "mayaExpressions.settings",
+          "name": "Settings"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "mayaExpressions.connect",
+        "title": "Maya: Connect"
+      },
+      {
+        "command": "mayaExpressions.refresh",
+        "title": "Maya: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "mayaExpressions.selectInMaya",
+        "title": "Maya: Select Object in Maya",
+        "icon": "$(target)"
+      },
+      {
+        "command": "mayaExpressions.setUnitConversion",
+        "title": "Maya: Set Convert Units"
+      },
+      {
+        "command": "mayaExpressions.toggleAlwaysEvaluate",
+        "title": "Maya: Toggle Always Evaluate"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "mayaExpressions.refresh",
+          "when": "view == mayaExpressions.tree",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "mayaExpressions.selectInMaya",
+          "when": "viewItem == object",
+          "group": "inline"
+        },
+        {
+          "command": "mayaExpressions.setUnitConversion",
+          "when": "viewItem == expression"
+        },
+        {
+          "command": "mayaExpressions.toggleAlwaysEvaluate",
+          "when": "viewItem == expression"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Maya Expressions",
+      "properties": {
+        "mayaExpressions.followMayaSelection": {
+          "type": "boolean",
+          "default": true,
+          "description": "Highlight the object in the tree when it is selected in Maya."
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "mel",
+        "aliases": [
+          "MEL",
+          "mel"
+        ],
+        "extensions": [
+          ".mel"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "mel",
+        "scopeName": "source.mel",
+        "path": "./syntaxes/mel.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -watch -p .",
+    "lint": "tsc -p . --noEmit",
+    "package": "vsce package --no-dependencies --skip-license --allow-missing-repository",
+    "vscode:prepublish": "npm run compile",
+    "test": "npm run compile && node --require ./out/test/setup.js --test \"out/test/**/*.test.js\"",
+    "test:integration": "npm run compile && node ./out/integration/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.2.1",
+    "typescript": "^5.4.5",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.1.0"
+  }
+}
