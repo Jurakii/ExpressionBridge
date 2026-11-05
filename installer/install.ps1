@@ -180,6 +180,6 @@ Write-Host @"
 
 Done. Next:
   1. Start (or restart) Maya. An "Expression Bridge" menu appears and the bridge starts.
-  2. In VS Code, click the "M" icon in the activity bar to see your scene's expressions.
+  2. In VS Code, click the Expression Bridge icon in the activity bar to see your scene's expressions.
 "@ -ForegroundColor Green
 exit 0

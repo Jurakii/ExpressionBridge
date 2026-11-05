@@ -15,7 +15,7 @@ and Maya's errors show in VS Code's Problems panel.
    - copies the Maya module into `Documents\maya\modules` and writes `ExpressionBridge.mod`
    - installs the **Expression Bridge** extension into VS Code
 3. Start Maya, or restart it if it was open. An **Expression Bridge** menu appears in the main menu bar.
-4. In VS Code, click **Restart Extensions** if prompted, then click the **M** icon in the activity bar.
+4. In VS Code, click **Restart Extensions** if prompted, then click the **Expression Bridge** icon in the activity bar.
 
 `Install.bat` shows the Maya modules folder it will use. Press Enter to keep it. If your Maya prefs are somewhere else,
 such as a synced drive, enter that folder instead (for example `X:\Sync\maya\2025\prefs`). The module goes into the
@@ -40,7 +40,7 @@ You can delete the unzipped folder afterwards; everything is copied into place.
 
 | To | Do this |
 |---|---|
-| See expressions | VS Code **M** icon → **Objects** lists every object that has expressions |
+| See expressions | VS Code **Expression Bridge** icon → **Objects** lists every object that has expressions |
 | Edit | Click an expression, edit, **Ctrl+S**. Maya updates. **Ctrl+Z in Maya** undoes the whole save |
 | See errors | Maya's errors appear in **Problems** on the right line; Maya keeps the last working version |
 | Change settings | **Settings** panel under the tree: Convert units, Always evaluate (applies at once) |

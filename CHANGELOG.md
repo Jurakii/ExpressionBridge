@@ -7,6 +7,9 @@
   `Uninstall.bat` and **Maya: Install Bridge into Maya** now show the folder and let you change it. The default is
   unchanged.
 
+### Changed
+- New Expression Bridge icon in the activity bar, replacing the **M**.
+
 ## 1.0.0 - 2026-11-05
 
 First stable release: browse and edit Maya expressions from VS Code, with live two-way sync, Maya's errors in the
