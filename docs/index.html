@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Expression Bridge</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <meta name="description" content="How to install and use Expression Bridge, which lets you edit Maya expressions in VS Code.">
 <style>
 :root {
@@ -44,7 +45,8 @@ body {
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 h1, h2, h3 { line-height: 1.2; text-wrap: balance; font-weight: 600; }
-h1 { margin: 0; font-size: 2.25rem; }
+h1 { margin: 0; font-size: 2.25rem; display: flex; align-items: center; gap: .75rem; }
+h1 img { flex: none; width: 48px; height: 48px; }
 h2 { margin: 3.5rem 0 1rem; padding-top: 1.75rem; border-top: 1px solid var(--line); font-size: 1.6rem; scroll-margin-top: 16px; }
 h3 { margin: 2rem 0 .4rem; font-size: 1.1rem; }
 p, ol, ul { margin: 0 0 1rem; }
@@ -84,7 +86,7 @@ footer { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--line
 <body>
 
 <header>
-  <h1>Expression Bridge</h1>
+  <h1><img src="icon.svg" alt="">Expression Bridge</h1>
   <p class="intro">Edit Maya expressions in VS Code. Saving updates Maya, edits in Maya appear in VS Code, and Maya's
     errors show in the Problems panel.</p>
   <p class="needs">Version 1.0.0. Needs Windows 10 or 11, Maya 2024, 2025 or 2026, and VS Code 1.90 or newer.</p>
