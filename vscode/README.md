@@ -1,7 +1,7 @@
 # Expression Bridge
 
 Browse and edit Maya expressions from VS Code. This needs the Expression Bridge module
-running in Maya. In the project root, run `python maya/install.py`, then restart Maya.
+running in Maya. Run **Maya: Install Bridge into Maya** from the Command Palette, then restart Maya.
 
 - The **Expression Bridge** view lists objects that have expressions. Click one to open it.
 - When you save, the expression is sent to Maya. Errors Maya reports show in the Problems panel.

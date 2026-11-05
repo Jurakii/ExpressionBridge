@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    needs: test
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: vscode/package-lock.json
+      - name: Install extension dependencies
+        working-directory: vscode
+        run: npm ci
+      - name: Build the release zip
+        run: python tools/build_release.py
+      - name: Publish
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          # This version's CHANGELOG section. A tag that doesn't match the build fails on the file names below.
+          awk -v v="## $version " 'index($0, v) == 1 {on = 1; next} /^## / {on = 0} on' CHANGELOG.md > notes.md
+          gh release create "$GITHUB_REF_NAME" \
+            "dist/ExpressionBridge-$version.zip" \
+            "dist/ExpressionBridge-$version.zip.sha256" \
+            --title "Expression Bridge $version" \
+            --notes-file notes.md

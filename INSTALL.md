@@ -5,7 +5,7 @@ and Maya's errors show in VS Code's Problems panel.
 
 ## Requirements
 - Windows 10 or 11
-- Maya 2026 (tested; Maya 2024 and 2025 should work but are untested)
+- Maya 2024, 2025 or 2026
 - VS Code 1.90 or newer
 
 ## Install
@@ -20,6 +20,8 @@ and Maya's errors show in VS Code's Problems panel.
 You can delete the unzipped folder afterwards; everything is copied into place.
 
 **Other ways to install:**
+- **From VS Code alone:** install the VSIX (below), then run **Maya: Install Bridge into Maya** from the Command
+  Palette and restart Maya. **Maya: Uninstall Bridge from Maya** removes it again.
 - **Maya only, without a restart:** drag `maya\drag_and_drop_install.py` into a Maya viewport.
   It installs and starts the bridge right away.
 - **VS Code only:** in VS Code, open Extensions, click **...** (top right), choose **Install from VSIX...**, and pick

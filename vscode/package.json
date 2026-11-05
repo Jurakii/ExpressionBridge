@@ -2,10 +2,14 @@
   "name": "expression-bridge",
   "displayName": "Expression Bridge",
   "description": "Browse and edit Maya expressions live from VS Code.",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "publisher": "local",
   "license": "UNLICENSED",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jurakii/ExpressionPro.git"
+  },
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -73,6 +77,20 @@
       }
     ],
     "menus": {
+      "commandPalette": [
+        {
+          "command": "expressionBridge.selectInMaya",
+          "when": "false"
+        },
+        {
+          "command": "expressionBridge.setUnitConversion",
+          "when": "false"
+        },
+        {
+          "command": "expressionBridge.toggleAlwaysEvaluate",
+          "when": "false"
+        }
+      ],
       "view/title": [
         {
           "command": "expressionBridge.refresh",
@@ -131,7 +149,7 @@
     "compile": "tsc -p .",
     "watch": "tsc -watch -p .",
     "lint": "tsc -p . --noEmit",
-    "package": "vsce package --no-dependencies --skip-license --allow-missing-repository",
+    "package": "vsce package --no-dependencies --skip-license",
     "vscode:prepublish": "npm run compile",
     "test": "npm run compile && node --require ./out/test/setup.js --test \"out/test/**/*.test.js\"",
     "test:integration": "npm run compile && node ./out/integration/runTest.js",
@@ -141,7 +159,7 @@
     "@types/node": "^20.11.0",
     "@types/vscode": "^1.90.0",
     "@vscode/test-electron": "^2.5.2",
-    "@vscode/vsce": "^3.2.1",
+    "@vscode/vsce": "^4.1.0",
     "typescript": "^5.4.5",
     "vscode-oniguruma": "^2.0.1",
     "vscode-textmate": "^9.1.0"

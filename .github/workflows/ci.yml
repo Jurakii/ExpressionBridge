@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: vscode/package-lock.json
+      - name: Maya-side unit tests
+        run: python -m unittest discover -s maya/tests
+      - name: Install extension dependencies
+        working-directory: vscode
+        run: npm ci
+      - name: Type check
+        working-directory: vscode
+        run: npm run lint
+      - name: Extension unit tests
+        working-directory: vscode
+        run: npm test
