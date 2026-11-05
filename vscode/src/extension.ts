@@ -1,6 +1,8 @@
+import * as path from "node:path";
 import * as vscode from "vscode";
 import { ExpressionSettings, ExpressionsChanged, MayaClient, SelectionChanged } from "./client";
 import { ExpressionFileSystem, parseUri, SCHEME, uriFor } from "./expressionFs";
+import { findModulesDir, installModule, uninstallModule } from "./install";
 import { SettingsViewProvider } from "./settingsView";
 import { ExpressionTreeProvider, Node } from "./tree";
 
@@ -133,6 +135,8 @@ export function activate(context: vscode.ExtensionContext): void {
         await updateSettings(node, { unitConversion: pick as ExpressionSettings["unitConversion"] });
       }
     })),
+    vscode.commands.registerCommand("mayaExpressions.installBridge", run(() => installBridge(context))),
+    vscode.commands.registerCommand("mayaExpressions.uninstallBridge", run(() => uninstallBridge())),
     vscode.commands.registerCommand("mayaExpressions.toggleAlwaysEvaluate", run(async (node?: Node) => {
       if (node?.type !== "expression") {
         return;
@@ -145,6 +149,43 @@ export function activate(context: vscode.ExtensionContext): void {
 
   setStatus(false);
   void connect(true);
+}
+
+async function installBridge(context: vscode.ExtensionContext): Promise<void> {
+  const modulesDir = findModulesDir();
+  const choice = await vscode.window.showInformationMessage(
+    `Install the Expression Bridge into Maya?\n\n${modulesDir}`,
+    { modal: true },
+    "Install",
+  );
+  if (choice !== "Install") {
+    return;
+  }
+  const { version } = installModule(context.asAbsolutePath(path.join("resources", "maya-module")), modulesDir);
+  const restart = "Restart Maya";
+  const picked = await vscode.window.showInformationMessage(
+    `Expression Bridge ${version} installed. Restart Maya to load it.`,
+    restart,
+  );
+  if (picked === restart) {
+    void vscode.window.showInformationMessage("Close and reopen Maya, then open the Maya Expressions view.");
+  }
+}
+
+async function uninstallBridge(): Promise<void> {
+  const modulesDir = findModulesDir();
+  const choice = await vscode.window.showWarningMessage(
+    "Remove the Expression Bridge from Maya? Maya will no longer load it after a restart.",
+    { modal: true },
+    "Uninstall",
+  );
+  if (choice !== "Uninstall") {
+    return;
+  }
+  const removed = uninstallModule(modulesDir);
+  void vscode.window.showInformationMessage(
+    removed ? "Expression Bridge removed from Maya. Restart Maya to finish." : "The Expression Bridge was not installed in Maya.",
+  );
 }
 
 export function deactivate(): void {}

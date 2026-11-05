@@ -62,6 +62,14 @@
       {
         "command": "mayaExpressions.toggleAlwaysEvaluate",
         "title": "Maya: Toggle Always Evaluate"
+      },
+      {
+        "command": "mayaExpressions.installBridge",
+        "title": "Maya: Install Bridge into Maya"
+      },
+      {
+        "command": "mayaExpressions.uninstallBridge",
+        "title": "Maya: Uninstall Bridge from Maya"
       }
     ],
     "menus": {
@@ -126,7 +134,8 @@
     "package": "vsce package --no-dependencies --skip-license --allow-missing-repository",
     "vscode:prepublish": "npm run compile",
     "test": "npm run compile && node --require ./out/test/setup.js --test \"out/test/**/*.test.js\"",
-    "test:integration": "npm run compile && node ./out/integration/runTest.js"
+    "test:integration": "npm run compile && node ./out/integration/runTest.js",
+    "prepackage": "node scripts/bundle-maya.js"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

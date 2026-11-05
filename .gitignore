@@ -3,3 +3,4 @@ vscode/out/
 __pycache__/
 *.vsix
 dist/
+vscode/resources/maya-module/
