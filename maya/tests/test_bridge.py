@@ -197,8 +197,11 @@ class ServerTests(unittest.TestCase):
         pushes.start()
         pushes.join(10)
         self.assertFalse(pushes.is_alive(), "broadcast blocked on a stalled client")
-        while sock.recv(1 << 20):  # and the client was dropped: this reaches EOF
-            pass
+        try:
+            while sock.recv(1 << 20):  # and the client was dropped: this reaches EOF
+                pass
+        except ConnectionResetError:
+            pass  # Windows reports the drop as a reset when unsent data is discarded
 
     def test_end_to_end_over_socket(self):
         session_path = self.session_path()
