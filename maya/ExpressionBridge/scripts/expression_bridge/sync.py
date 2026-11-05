@@ -99,5 +99,7 @@ class Poller:
         while not self._stop.wait(self._interval):
             try:
                 self._on_main(self._watcher.poll)
+            except TimeoutError:
+                log.debug("Skipped a poll: Maya is busy")
             except Exception:
                 log.exception("Expression poll failed")

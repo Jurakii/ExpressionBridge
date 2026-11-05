@@ -47,16 +47,8 @@ def _split_particle(expr_id):
 
 
 def get(cmds, expr_id):
-    particle = _split_particle(expr_id)
-    if particle:
-        shape, slot = particle
-        if not cmds.objExists(shape):
-            raise BridgeError(f"No such particle shape: {shape}", NOT_FOUND)
-        data = {"id": expr_id, "kind": "particle", "language": "mel",
-                "text": particle_text(cmds, shape, slot), "settings": {"slot": slot}}
-    else:
-        if not cmds.objExists(expr_id) or cmds.nodeType(expr_id) != "expression":
-            raise BridgeError(f"No such expression: {expr_id}", NOT_FOUND)
+    # Check for a node first: `ns:creation` is an expression in a namespace, not a particle slot.
+    if cmds.objExists(expr_id) and cmds.nodeType(expr_id) == "expression":
         data = {
             "id": expr_id,
             "kind": "expression",
@@ -67,6 +59,15 @@ def get(cmds, expr_id):
                 "alwaysEvaluate": bool(cmds.expression(expr_id, query=True, alwaysEvaluate=True)),
             },
         }
+    else:
+        particle = _split_particle(expr_id)
+        if not particle:
+            raise BridgeError(f"No such expression: {expr_id}", NOT_FOUND)
+        shape, slot = particle
+        if not cmds.objExists(shape):
+            raise BridgeError(f"No such particle shape: {shape}", NOT_FOUND)
+        data = {"id": expr_id, "kind": "particle", "language": "mel",
+                "text": particle_text(cmds, shape, slot), "settings": {"slot": slot}}
     data["hash"] = content_hash(data)
     return data
 

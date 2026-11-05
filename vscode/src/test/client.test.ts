@@ -132,6 +132,43 @@ describe("MayaClient", () => {
     assert.equal(client.connected, false);
   });
 
+  it("reconnecting replaces the connection and stays connected", async () => {
+    const states: boolean[] = [];
+    client.on("state", (s: boolean) => states.push(s));
+    await client.connect();
+    await client.connect();
+    await new Promise((resolve) => setTimeout(resolve, 20)); // let the old socket's "close" arrive
+    assert.deepEqual(states, [true, false, true]);
+    assert.equal(client.connected, true);
+    await client.list();
+  });
+
+  it("a superseded connect() fails instead of hanging", async () => {
+    const first = client.connect();
+    const second = client.connect();
+    await assert.rejects(first, /closed/);
+    await second;
+    assert.equal(client.connected, true);
+  });
+
+  it("does not report a state change for a failed attempt", async () => {
+    const states: boolean[] = [];
+    client.on("state", (s: boolean) => states.push(s));
+    bridge.reply = (req) => ({ jsonrpc: "2.0", id: req.id, error: { code: -32001, message: "Unauthorized" } });
+    await assert.rejects(client.connect(), /Unauthorized/);
+    assert.deepEqual(states, []);
+    assert.equal(client.connected, false);
+    await assert.rejects(client.list(), /Not connected/);
+  });
+
+  it("is not connected until the ping succeeds", async () => {
+    bridge.reply = () => undefined;
+    const attempt = client.connect();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal(client.connected, false);
+    await assert.rejects(attempt, /did not answer "ping"/);
+  });
+
   it("waitForConnection resolves when a connection arrives", async () => {
     const waiting = client.waitForConnection(2000);
     await client.connect();

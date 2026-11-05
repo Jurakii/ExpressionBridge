@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { after, before, describe, it } from "node:test";
-import { findModulesDir, installModule, modText, readModuleVersion, uninstallModule } from "../install";
+import { expandEnv, findModulesDir, installModule, modText, readModuleVersion, uninstallModule } from "../install";
 
 let root: string;
 let source: string;
@@ -47,6 +47,15 @@ describe("findModulesDir", () => {
       return;
     }
     assert.equal(findModulesDir({}, () => "D:\\OneDrive\\Documents"), path.join("D:\\OneDrive\\Documents", "maya", "modules"));
+  });
+});
+
+describe("expandEnv", () => {
+  it("expands every known variable and leaves unknown ones", () => {
+    const env = { USERPROFILE: "C:\\Users\\a", OneDrive: "D:\\OD" };
+    assert.equal(expandEnv("%USERPROFILE%\\Documents", env), "C:\\Users\\a\\Documents");
+    assert.equal(expandEnv("%OneDrive%\\Docs", env), "D:\\OD\\Docs");
+    assert.equal(expandEnv("%NOPE%\\Docs", env), "%NOPE%\\Docs");
   });
 });
 

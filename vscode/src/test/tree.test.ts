@@ -44,6 +44,15 @@ describe("ExpressionTreeProvider", () => {
     assert.equal(item.command?.command, "vscode.open");
   });
 
+  it("does not offer Select in Maya on the <Scene> group", async () => {
+    const client = { connected: true, list: async () => ({ "<Scene>": [], pCube1: [] }) };
+    const tree = new ExpressionTreeProvider(client as unknown as MayaClient);
+    await tree.refresh();
+    const [scene, cube] = tree.getChildren().map((n) => tree.getTreeItem(n));
+    assert.equal(scene.contextValue, "scene");
+    assert.equal(cube.contextValue, "object");
+  });
+
   it("is empty while disconnected", async () => {
     const tree = new ExpressionTreeProvider({ connected: false } as unknown as MayaClient);
     await tree.refresh();

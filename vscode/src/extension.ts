@@ -31,6 +31,7 @@ export function activate(context: vscode.ExtensionContext): void {
     try {
       const session = await client.connect();
       await tree.refresh();
+      followEditor(vscode.window.activeTextEditor);
       if (!quiet) {
         vscode.window.showInformationMessage(`Connected to Maya ${session.mayaVersion ?? ""}`.trim());
       }
@@ -45,13 +46,19 @@ export function activate(context: vscode.ExtensionContext): void {
   // Maya restarts get a new port and token, so keep re-reading session.json.
   const scheduleReconnect = () => {
     clearTimeout(reconnectTimer);
-    reconnectTimer = setTimeout(() => void connect(true), RECONNECT_MS);
+    reconnectTimer = setTimeout(() => {
+      if (!client.connected) {
+        void connect(true);
+      }
+    }, RECONNECT_MS);
   };
 
   client.on("state", (connected: boolean) => {
     setStatus(connected);
     void settingsView.reload();
-    if (!connected) {
+    if (connected) {
+      clearTimeout(reconnectTimer);
+    } else {
       void tree.refresh();
       scheduleReconnect();
     }
@@ -64,7 +71,7 @@ export function activate(context: vscode.ExtensionContext): void {
       void settingsView.reload();
     }
     if (change.treeChanged) {
-      void tree.refresh();
+      tree.refresh().catch((err: Error) => console.error(`Expression Bridge: refresh failed: ${err.message}`));
     }
   });
 
@@ -112,7 +119,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     status,
     diagnostics,
-    { dispose: () => { clearTimeout(reconnectTimer); client.disconnect(); } },
+    { dispose: () => { client.removeAllListeners(); clearTimeout(reconnectTimer); client.disconnect(); } },
     vscode.workspace.registerFileSystemProvider(SCHEME, fsProvider, { isCaseSensitive: true }),
     treeView,
     vscode.window.registerWebviewViewProvider(SettingsViewProvider.viewId, settingsView),
@@ -162,14 +169,9 @@ async function installBridge(context: vscode.ExtensionContext): Promise<void> {
     return;
   }
   const { version } = installModule(context.asAbsolutePath(path.join("resources", "maya-module")), modulesDir);
-  const restart = "Restart Maya";
-  const picked = await vscode.window.showInformationMessage(
-    `Expression Bridge ${version} installed. Restart Maya to load it.`,
-    restart,
+  void vscode.window.showInformationMessage(
+    `Expression Bridge ${version} installed. Close and reopen Maya to load it, then open the Expression Bridge view.`,
   );
-  if (picked === restart) {
-    void vscode.window.showInformationMessage("Close and reopen Maya, then open the Expression Bridge view.");
-  }
 }
 
 async function uninstallBridge(): Promise<void> {

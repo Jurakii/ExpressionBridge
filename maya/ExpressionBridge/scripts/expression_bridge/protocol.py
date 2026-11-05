@@ -31,18 +31,15 @@ class Handler:
     """Validates a request, checks the token and calls the matching method."""
 
     def __init__(self, token, methods, logger=None):
-        self._token = token
+        self._token = token.encode("utf-8")
         self._methods = {"ping": lambda: {"protocol": PROTOCOL_VERSION}, **methods}
         self._log = logger
-
-    def handle_line(self, line):
-        return self.handle(line)[0]
 
     def handle(self, line):
         """Return (response, authorized). Only authorized peers receive pushes."""
         try:
             request = json.loads(line)
-        except (ValueError, UnicodeDecodeError):
+        except (ValueError, RecursionError):  # ValueError includes UnicodeDecodeError
             return error_response(None, PARSE_ERROR, "Parse error"), False
         if not isinstance(request, dict):
             return error_response(None, INVALID_REQUEST, "Invalid request"), False
@@ -50,12 +47,12 @@ class Handler:
         req_id = request.get("id")
         if request.get("jsonrpc") != "2.0" or not isinstance(request.get("method"), str):
             return error_response(req_id, INVALID_REQUEST, "Invalid request"), False
-        if not hmac.compare_digest(str(request.get("token", "")), self._token):
+        # Compare bytes: compare_digest raises on non-ASCII str, and this input is untrusted.
+        if not hmac.compare_digest(str(request.get("token", "")).encode("utf-8", "replace"), self._token):
             return error_response(req_id, UNAUTHORIZED, "Unauthorized"), False
         return self._dispatch(request, req_id), True
 
     def _dispatch(self, request, req_id):
-
         name = request["method"]
         method = self._methods.get(name)
         if method is None:

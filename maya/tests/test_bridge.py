@@ -3,8 +3,10 @@ import os
 import socket
 import sys
 import tempfile
+import threading
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ExpressionBridge" / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -87,6 +89,10 @@ class AdapterTests(unittest.TestCase):
     def test_clean_write_has_no_errors(self):
         self.assertEqual(adapter.set_(self.cmds, "expr1", text="ok;", capture=self.cmds.capture)["errors"], [])
 
+    def test_expression_in_a_namespace_named_like_a_slot(self):
+        self.cmds.add_expression("ns:creation", "x;", drives=["pCube1.tx"])
+        self.assertEqual(adapter.get(self.cmds, "ns:creation")["kind"], "expression")
+
     def test_missing_expression(self):
         with self.assertRaises(adapter.BridgeError) as ctx:
             adapter.get(self.cmds, "nope")
@@ -98,14 +104,21 @@ class ProtocolTests(unittest.TestCase):
         self.handler = Handler("secret", server.build_methods(make_scene(), run_inline))
 
     def call(self, method, params=None, token="secret"):
-        return self.handler.handle_line(json.dumps(
-            {"jsonrpc": "2.0", "id": 1, "method": method, "params": params or {}, "token": token}))
+        return self.handler.handle(json.dumps(
+            {"jsonrpc": "2.0", "id": 1, "method": method, "params": params or {}, "token": token}))[0]
 
     def test_rejects_bad_token(self):
         self.assertEqual(self.call("list", token="wrong")["error"]["code"], -32001)
 
+    def test_rejects_non_ascii_and_non_string_tokens(self):
+        for token in ("t\u00f6ken", "\ud800", 5, None):
+            self.assertEqual(self.call("list", token=token)["error"]["code"], -32001)
+
     def test_parse_error(self):
-        self.assertEqual(self.handler.handle_line(b"{nope")["error"]["code"], -32700)
+        self.assertEqual(self.handler.handle(b"{nope")[0]["error"]["code"], -32700)
+
+    def test_deeply_nested_json_is_a_parse_error(self):
+        self.assertEqual(self.handler.handle(b"[" * 200000)[0]["error"]["code"], -32700)
 
     def test_unknown_method(self):
         self.assertEqual(self.call("explode")["error"]["code"], -32601)
@@ -113,8 +126,17 @@ class ProtocolTests(unittest.TestCase):
     def test_bad_params(self):
         self.assertEqual(self.call("get", {"wrong": 1})["error"]["code"], -32602)
 
+    def test_params_cannot_reach_the_dispatcher(self):
+        self.assertEqual(self.call("get", {"id": "expr1", "timeout": 0})["error"]["code"], -32602)
+
     def test_get(self):
         self.assertEqual(self.call("get", {"id": "expr1"})["result"]["text"], "pCube1.ty = time;")
+
+
+class DispatchTests(unittest.TestCase):
+    def test_timeout_is_a_builtin_timeout_with_a_message(self):
+        with self.assertRaisesRegex(TimeoutError, "busy"):
+            dispatch.run_on_main(lambda: None, timeout=0.01, defer=lambda task: None)
 
 
 class ServerTests(unittest.TestCase):
@@ -133,8 +155,53 @@ class ServerTests(unittest.TestCase):
             os.environ["LOCALAPPDATA"] = self._old
         self.tmp.cleanup()
 
+    def session_path(self):
+        return Path(self.tmp.name) / "ExpressionBridge" / "session.json"
+
+    def connect_authorized(self):
+        sock = socket.create_connection(("127.0.0.1", self.port), timeout=5)
+        self.addCleanup(sock.close)
+        session = json.loads(self.session_path().read_text())
+        stream = sock.makefile("rwb")
+        self.addCleanup(stream.close)
+        request = {"jsonrpc": "2.0", "id": 1, "method": "ping", "token": session["token"]}
+        stream.write((json.dumps(request) + "\n").encode())
+        stream.flush()
+        self.assertIn("result", json.loads(stream.readline()))
+        return sock
+
+    def test_stop_disconnects_clients(self):
+        sock = self.connect_authorized()
+        server.stop()
+        self.assertEqual(sock.recv(1), b"")
+
+    def test_stop_leaves_another_mayas_session_file(self):
+        path = self.session_path()
+        path.write_text(json.dumps({"token": "another Maya"}))
+        server.stop()
+        self.assertTrue(path.exists())
+
+    def test_oversized_message_drops_the_connection(self):
+        with mock.patch.object(server, "MAX_LINE_BYTES", 16):
+            sock = socket.create_connection(("127.0.0.1", self.port), timeout=5)
+            self.addCleanup(sock.close)
+            sock.sendall(b"x" * 64 + b"\n")
+            self.assertEqual(sock.recv(1), b"")
+
+    def test_client_that_stops_reading_cannot_block_a_push(self):
+        with mock.patch.object(server, "MAX_QUEUED_MESSAGES", 2):
+            sock = self.connect_authorized()
+        blob = "x" * (1 << 20)
+        pushes = threading.Thread(target=lambda: [
+            server._server.server.broadcast("big", {"blob": blob}) for _ in range(64)], daemon=True)
+        pushes.start()
+        pushes.join(10)
+        self.assertFalse(pushes.is_alive(), "broadcast blocked on a stalled client")
+        while sock.recv(1 << 20):  # and the client was dropped: this reaches EOF
+            pass
+
     def test_end_to_end_over_socket(self):
-        session_path = Path(self.tmp.name) / "ExpressionBridge" / "session.json"
+        session_path = self.session_path()
         session = json.loads(session_path.read_text())
         self.assertEqual(session["port"], self.port)
 

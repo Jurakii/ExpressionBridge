@@ -26,4 +26,5 @@ def run_on_main(fn, *args, timeout=30.0, defer=None, **kwargs):
         return future.result(timeout=timeout)
     except concurrent.futures.TimeoutError:
         future.cancel()
-        raise
+        # The builtin, which concurrent.futures.TimeoutError only became in Python 3.11.
+        raise TimeoutError("Maya is busy and did not respond in time") from None

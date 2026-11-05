@@ -82,8 +82,10 @@ export function sessionFilePath(): string {
 export class MayaClient extends EventEmitter {
   private socket?: net.Socket;
   private session?: Session;
+  private ready = false; // the ping succeeded, so "state" true has been emitted
   private buffer = "";
   private nextId = 1;
+  private connectAttempt = 0;
   private pending = new Map<number, Pending>();
 
   constructor(private readonly timeoutMs = REQUEST_TIMEOUT_MS) {
@@ -91,7 +93,7 @@ export class MayaClient extends EventEmitter {
   }
 
   get connected(): boolean {
-    return !!this.socket && !this.socket.destroyed;
+    return this.ready;
   }
 
   /**
@@ -122,6 +124,7 @@ export class MayaClient extends EventEmitter {
   }
 
   async connect(): Promise<Session> {
+    const attempt = ++this.connectAttempt;
     this.disconnect();
     const file = sessionFilePath();
     let raw: string;
@@ -134,25 +137,40 @@ export class MayaClient extends EventEmitter {
     if (session.protocol !== PROTOCOL_VERSION) {
       throw new Error(`Maya bridge protocol ${session.protocol} is not supported (expected ${PROTOCOL_VERSION})`);
     }
+    if (attempt !== this.connectAttempt) {
+      throw new Error("Connection to Maya closed"); // a newer connect() took over during the read
+    }
 
-    await new Promise<void>((resolve, reject) => {
-      const socket = net.createConnection({ host: "127.0.0.1", port: session.port }, resolve);
+    const socket = await new Promise<net.Socket>((resolve, reject) => {
+      const socket = net.createConnection({ host: "127.0.0.1", port: session.port }, () => resolve(socket));
       socket.setEncoding("utf8");
-      socket.once("error", reject);
-      socket.on("data", (chunk: string) => this.onData(chunk));
-      socket.on("close", () => this.onClose());
+      socket.on("error", reject); // Node closes the socket after an error, so "close" cleans up
+      socket.on("data", (chunk: string) => this.onData(socket, chunk));
+      socket.on("close", () => {
+        reject(new Error("Connection to Maya closed")); // a newer connect() replaced this one
+        this.onClose(socket);
+      });
       this.socket = socket;
     });
-    this.socket!.on("error", () => this.socket?.destroy());
     this.session = session;
-    await this.request("ping");
+    try {
+      await this.request("ping");
+    } catch (err) {
+      this.onClose(socket);
+      socket.destroy();
+      throw err;
+    }
+    this.ready = true;
     this.emit("state", true);
     return session;
   }
 
   disconnect(): void {
-    this.socket?.destroy();
-    this.socket = undefined;
+    const socket = this.socket;
+    if (socket) {
+      this.onClose(socket);
+      socket.destroy();
+    }
   }
 
   list(): Promise<SceneTree> {
@@ -172,7 +190,7 @@ export class MayaClient extends EventEmitter {
   }
 
   private request(method: string, params: object = {}): Promise<unknown> {
-    if (!this.connected || !this.session) {
+    if (!this.socket || !this.session) {
       return Promise.reject(new Error("Not connected to Maya"));
     }
     const id = this.nextId++;
@@ -187,7 +205,10 @@ export class MayaClient extends EventEmitter {
     });
   }
 
-  private onData(chunk: string): void {
+  private onData(socket: net.Socket, chunk: string): void {
+    if (socket !== this.socket) {
+      return;
+    }
     this.buffer += chunk;
     let newline: number;
     while ((newline = this.buffer.indexOf("\n")) >= 0) {
@@ -229,14 +250,22 @@ export class MayaClient extends EventEmitter {
     }
   }
 
-  private onClose(): void {
+  /** Runs once per socket. A replaced socket's late "close" must not touch the new one. */
+  private onClose(socket: net.Socket): void {
+    if (socket !== this.socket) {
+      return;
+    }
+    this.socket = undefined;
+    this.session = undefined;
     for (const { reject, timer } of this.pending.values()) {
       clearTimeout(timer);
       reject(new Error("Connection to Maya closed"));
     }
     this.pending.clear();
     this.buffer = "";
-    this.socket = undefined;
-    this.emit("state", false);
+    if (this.ready) {
+      this.ready = false;
+      this.emit("state", false);
+    }
   }
 }

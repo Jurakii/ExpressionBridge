@@ -153,7 +153,7 @@ class RealMayaServerTests(unittest.TestCase):
 
     def test_list_get_set_over_socket(self):
         session = json.loads((Path(self.tmp.name) / "ExpressionBridge" / "session.json").read_text())
-        self.assertEqual(session["mayaVersion"], "2026")
+        self.assertEqual(session["mayaVersion"], cmds.about(version=True))
         with socket.create_connection(("127.0.0.1", self.port), timeout=10) as sock:
             stream = sock.makefile("rwb")
 
@@ -171,13 +171,6 @@ class RealMayaServerTests(unittest.TestCase):
             self.assertEqual(stale["error"]["code"], -32009)
             self.assertEqual(call("select", object="pSphere1")["result"], {"selected": "pSphere1"})
             self.assertEqual(cmds.ls(selection=True), ["pSphere1"])
-
-
-class RealMayaSpikeTests(unittest.TestCase):
-    def test_spike_runs(self):
-        from expression_bridge import spike
-        new_scene()
-        self.assertIn("pCube1", spike.run())
 
 
 if __name__ == "__main__":

@@ -20,6 +20,11 @@ export function modText(version: string): string {
   return `+ ${MODULE_NAME} ${version} ./${MODULE_NAME}\r\nscripts: scripts\r\n`;
 }
 
+/** Expands `%NAME%` references, which a REG_EXPAND_SZ value may hold. Unknown names stay as they are. */
+export function expandEnv(value: string, env: NodeJS.ProcessEnv = process.env): string {
+  return value.replace(/%([^%]+)%/g, (text, name: string) => env[name] ?? text);
+}
+
 /** Documents folder as the Windows registry knows it, so OneDrive redirection is followed. */
 export function documentsFromRegistry(): string | undefined {
   try {
@@ -29,7 +34,7 @@ export function documentsFromRegistry(): string | undefined {
       { encoding: "utf-8", windowsHide: true },
     );
     const match = /Personal\s+REG_(?:EXPAND_)?SZ\s+(.+)$/m.exec(out);
-    return match ? match[1].trim().replace(/%USERPROFILE%/i, os.homedir()) : undefined;
+    return match ? expandEnv(match[1].trim()) : undefined;
   } catch {
     return undefined;
   }

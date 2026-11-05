@@ -94,9 +94,13 @@ export class SettingsViewProvider implements vscode.WebviewViewProvider {
     }
     const target = this.target;
     try {
-      this.expr = await this.client.set(target.id, { settings });
-      this.error = undefined;
+      const updated = await this.client.set(target.id, { settings });
       this.onSettingsWritten(target);
+      if (this.target?.id !== target.id) {
+        return; // the selection moved on while Maya was writing
+      }
+      this.expr = updated;
+      this.error = undefined;
     } catch (err) {
       // Reload so the controls snap back to Maya's real values, then show why.
       await this.reload();
@@ -104,9 +108,7 @@ export class SettingsViewProvider implements vscode.WebviewViewProvider {
       this.post();
       return;
     }
-    if (this.target?.id === target.id) {
-      this.post();
-    }
+    this.post();
   }
 
   private post(): void {

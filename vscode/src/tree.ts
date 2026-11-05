@@ -2,6 +2,9 @@ import * as vscode from "vscode";
 import { ExpressionSummary, MayaClient, SceneTree } from "./client";
 import { uriFor } from "./expressionFs";
 
+/** The group for expressions that drive nothing; see SCENE_GROUP in scanner.py. It isn't a Maya object. */
+const SCENE_GROUP = "<Scene>";
+
 export type Node =
   | { type: "object"; name: string }
   | { type: "expression"; object: string; expr: ExpressionSummary };
@@ -48,7 +51,7 @@ export class ExpressionTreeProvider implements vscode.TreeDataProvider<Node> {
     if (node.type === "object") {
       const item = new vscode.TreeItem(node.name, vscode.TreeItemCollapsibleState.Collapsed);
       item.id = `object:${node.name}`;
-      item.contextValue = "object";
+      item.contextValue = node.name === SCENE_GROUP ? "scene" : "object";
       item.iconPath = new vscode.ThemeIcon("symbol-class");
       return item;
     }
