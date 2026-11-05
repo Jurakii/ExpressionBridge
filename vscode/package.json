@@ -121,6 +121,12 @@
           "type": "boolean",
           "default": true,
           "description": "Highlight the object in the tree when it is selected in Maya."
+        },
+        "expressionBridge.mayaModulesDir": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Folder that Maya: Install Bridge into Maya installs to. Leave empty to use MAYA_APP_DIR\\modules, or Documents\\maya\\modules."
         }
       }
     },

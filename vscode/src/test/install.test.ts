@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { after, before, describe, it } from "node:test";
-import { expandEnv, findModulesDir, installModule, modText, readModuleVersion, uninstallModule } from "../install";
+import { expandEnv, findModulesDir, installModule, modText, modulesDirFrom, readModuleVersion, uninstallModule } from "../install";
 
 let root: string;
 let source: string;
@@ -47,6 +47,23 @@ describe("findModulesDir", () => {
       return;
     }
     assert.equal(findModulesDir({}, () => "D:\\OneDrive\\Documents"), path.join("D:\\OneDrive\\Documents", "maya", "modules"));
+  });
+});
+
+describe("modulesDirFrom", () => {
+  const version = path.join("X:", "Sync", "maya", "2025");
+  const modules = path.join(version, "modules");
+
+  it("maps a prefs folder to the modules folder beside it", () => {
+    assert.equal(modulesDirFrom(path.join(version, "prefs")), modules);
+  });
+
+  it("adds modules to a version or maya folder", () => {
+    assert.equal(modulesDirFrom(version), modules);
+  });
+
+  it("keeps a modules folder as it is", () => {
+    assert.equal(modulesDirFrom(modules), modules);
   });
 });
 

@@ -2,7 +2,7 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 import { ExpressionSettings, ExpressionsChanged, MayaClient, SelectionChanged } from "./client";
 import { ExpressionFileSystem, parseUri, SCHEME, uriFor } from "./expressionFs";
-import { findModulesDir, installModule, uninstallModule } from "./install";
+import { findModulesDir, installModule, modulesDirFrom, uninstallModule } from "./install";
 import { SettingsViewProvider } from "./settingsView";
 import { ExpressionTreeProvider, Node } from "./tree";
 
@@ -158,30 +158,57 @@ export function activate(context: vscode.ExtensionContext): void {
   void connect(true);
 }
 
+/** Shows the modules folder and lets the user change it. Returns undefined if they cancel. */
+async function confirmModulesDir(
+  show: typeof vscode.window.showInformationMessage,
+  question: string,
+  action: string,
+): Promise<string | undefined> {
+  const choose = "Choose Folder...";
+  let dir = vscode.workspace.getConfiguration("expressionBridge").get<string>("mayaModulesDir") || findModulesDir();
+  for (;;) {
+    const choice = await show(`${question}\n\n${dir}`, { modal: true }, action, choose);
+    if (choice === action) {
+      return dir;
+    }
+    if (choice !== choose) {
+      return undefined;
+    }
+    const picked = await vscode.window.showOpenDialog({
+      canSelectFolders: true,
+      canSelectFiles: false,
+      defaultUri: vscode.Uri.file(dir),
+      title: "Choose your Maya prefs or modules folder",
+      openLabel: "Use This Folder",
+    });
+    if (picked) {
+      dir = modulesDirFrom(picked[0].fsPath);
+    }
+  }
+}
+
 async function installBridge(context: vscode.ExtensionContext): Promise<void> {
-  const modulesDir = findModulesDir();
-  const choice = await vscode.window.showInformationMessage(
-    `Install the Expression Bridge into Maya?\n\n${modulesDir}`,
-    { modal: true },
-    "Install",
-  );
-  if (choice !== "Install") {
+  const modulesDir = await confirmModulesDir(vscode.window.showInformationMessage, "Install the Expression Bridge into Maya?", "Install");
+  if (!modulesDir) {
     return;
   }
   const { version } = installModule(context.asAbsolutePath(path.join("resources", "maya-module")), modulesDir);
+  // Remembered so upgrades and uninstalling find the same folder.
+  await vscode.workspace
+    .getConfiguration("expressionBridge")
+    .update("mayaModulesDir", modulesDir === findModulesDir() ? undefined : modulesDir, vscode.ConfigurationTarget.Global);
   void vscode.window.showInformationMessage(
     `Expression Bridge ${version} installed. Close and reopen Maya to load it, then open the Expression Bridge view.`,
   );
 }
 
 async function uninstallBridge(): Promise<void> {
-  const modulesDir = findModulesDir();
-  const choice = await vscode.window.showWarningMessage(
+  const modulesDir = await confirmModulesDir(
+    vscode.window.showWarningMessage,
     "Remove the Expression Bridge from Maya? Maya will no longer load it after a restart.",
-    { modal: true },
     "Uninstall",
   );
-  if (choice !== "Uninstall") {
+  if (!modulesDir) {
     return;
   }
   const removed = uninstallModule(modulesDir);
