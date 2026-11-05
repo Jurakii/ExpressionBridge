@@ -124,11 +124,10 @@ auto-closing and indentation.
 - **Not covered by automation:** the settings panel's in-page script (its host side is unit-tested), and the Maya *UI*:
   scriptJobs, `executeDeferred`, the menu and `userSetup.py` only run in an interactive Maya, not mayapy.
 
-**For 1.0.0**, all of the suites above pass, with the real-Maya suite run on Maya 2024 and 2025. The earlier
+**For 1.0.0**, all of the suites above pass, with the real-Maya suite run on Maya 2024 and 2026 (and on 2025 before the final changes). The earlier
 0.x code was run on Maya 2026 with VS Code 1.143 (2026-10-29), including by hand in the interactive UI with
 `maya/tests/demo_scene.py`: the menu, tree, editor, settings panel, a Maya edit reloading the open editor within about
-a second, and Maya's selection following into the tree. Those Maya 2026 and interactive checks have not been repeated
-on 1.0.0.
+a second, and Maya's selection following into the tree. Those interactive checks have not been repeated on 1.0.0.
 
 ## Maya behavior worth knowing
 - Expressions that drive rotations connect through hidden `unitConversion` nodes, so the scanner

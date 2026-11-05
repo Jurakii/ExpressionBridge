@@ -1,19 +1,13 @@
 # Changelog
 
-## Unreleased
-
-### Added
-- The Maya module can be installed outside Documents, for example to prefs on a synced drive. `Install.bat`,
-  `Uninstall.bat` and **Maya: Install Bridge into Maya** now show the folder and let you change it. The default is
-  unchanged.
-
-### Changed
-- New Expression Bridge icon in the activity bar, replacing the **M**.
-
 ## 1.0.0 - 2026-11-05
 
 First stable release: browse and edit Maya expressions from VS Code, with live two-way sync, Maya's errors in the
 Problems panel, a settings panel, MEL highlighting, and a Windows installer or one-click install from VS Code.
+
+### Added
+- The Maya module can be installed outside Documents, for example to prefs on a synced drive. `Install.bat`,
+  `Uninstall.bat` and **Maya: Install Bridge into Maya** show the folder and let you change it.
 
 ### Fixed
 - **Stop now disconnects VS Code.** Clients stayed connected to a stopped bridge and could still read and write, so
@@ -43,6 +37,7 @@ Problems panel, a settings panel, MEL highlighting, and a Windows installer or o
 - `session.json` is created readable only by the current user.
 
 ### Changed
+- New Expression Bridge icon in the activity bar, replacing the **M**.
 - The real-Maya test suite now passes on Maya 2024 and 2025, so both are listed as supported.
 - Commands that need a tree item are hidden from the Command Palette.
 - The `.bat` and `.ps1` files always have CRLF line endings.
