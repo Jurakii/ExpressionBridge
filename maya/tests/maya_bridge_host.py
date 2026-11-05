@@ -14,7 +14,7 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "MayaExpressionBridge" / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ExpressionBridge" / "scripts"))
 
 import maya.standalone  # noqa: E402
 

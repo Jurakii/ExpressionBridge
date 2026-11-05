@@ -8,7 +8,7 @@ import { findModulesDir, installModule, modText, readModuleVersion, uninstallMod
 let root: string;
 let source: string;
 
-/** A fake bundled module with the same layout as maya/MayaExpressionBridge. */
+/** A fake bundled module with the same layout as maya/ExpressionBridge. */
 function makeSource(dir: string, version: string): void {
   const pkg = path.join(dir, "scripts", "expression_bridge");
   fs.mkdirSync(path.join(pkg, "__pycache__"), { recursive: true });
@@ -33,7 +33,7 @@ describe("module version and .mod text", () => {
   });
 
   it("writes a .mod that points at the folder next to it", () => {
-    assert.equal(modText("1.2.3"), "+ MayaExpressionBridge 1.2.3 ./MayaExpressionBridge\r\nscripts: scripts\r\n");
+    assert.equal(modText("1.2.3"), "+ ExpressionBridge 1.2.3 ./ExpressionBridge\r\nscripts: scripts\r\n");
   });
 });
 
@@ -64,10 +64,10 @@ describe("installModule / uninstallModule", () => {
   it("replaces an older copy instead of merging with it", () => {
     const modules = path.join(root, "install-2", "modules");
     installModule(source, modules);
-    fs.writeFileSync(path.join(modules, "MayaExpressionBridge", "stale.py"), "old");
+    fs.writeFileSync(path.join(modules, "ExpressionBridge", "stale.py"), "old");
 
     installModule(source, modules);
-    assert.ok(!fs.existsSync(path.join(modules, "MayaExpressionBridge", "stale.py")));
+    assert.ok(!fs.existsSync(path.join(modules, "ExpressionBridge", "stale.py")));
   });
 
   it("uninstall removes both parts and reports what it found", () => {

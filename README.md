@@ -5,7 +5,7 @@ Implements PLAN.md milestones M0–M6. See PLAN.md for the design.
 
 ## Release
 ```
-python tools/build_release.py      # -> dist/MayaExpressionBridge-<version>.zip (+ .sha256)
+python tools/build_release.py      # -> dist/ExpressionBridge-<version>.zip (+ .sha256)
 ```
 The script refuses to build if `expression_bridge/__init__.py` and `vscode/package.json` have different
 versions. Bump both together. The zip contains `Install.bat` / `Uninstall.bat` (they wrap `installer/install.ps1`),
@@ -17,14 +17,14 @@ so the unzipped folder can be deleted afterwards.
 - `tools/build_release.py`: builds the release zip.
 - `maya/install.py`: developer install. Writes a `.mod` that points at this checkout (or `--copy`).
 - `maya/drag_and_drop_install.py`: drop into a Maya viewport to install and start without a restart.
-- `maya/MayaExpressionBridge/`: Maya module (`scripts/expression_bridge`, `userSetup.py`)
+- `maya/ExpressionBridge/`: Maya module (`scripts/expression_bridge`, `userSetup.py`)
   - `scanner.py` finds expressions, `adapter.py` gets/sets them (undoable, hash-checked),
     `protocol.py` handles JSON-RPC (no Maya imports), `dispatch.py` runs work on the main thread,
     `server.py` is the 127.0.0.1 TCP server and writes `session.json`, `sync.py` pushes changes,
     `errors.py` captures Maya errors, `ui.py` adds the Expression Bridge menu, `spike.py` is M0.
 - `maya/tests/`: unit and socket tests against an in-memory fake `cmds`, plus `test_maya_integration.py`
   (real Maya via mayapy) and `maya_bridge_host.py` (runs the bridge in mayapy for end-to-end checks).
-- `vscode/`: the extension (tree view, `maya-expr:` file system, status bar, auto-reconnect).
+- `vscode/`: the extension (tree view, `expr-bridge:` file system, status bar, auto-reconnect).
 - `vscode/src/test/`: extension unit tests (Node's built-in runner, no VS Code needed).
 - `vscode/src/integration/`: tests that run inside a real VS Code (`@vscode/test-electron`).
 
@@ -35,8 +35,8 @@ python -m unittest discover -s maya/tests          # Maya-side unit tests (no Ma
 cd vscode && npm test                              # extension unit tests (no VS Code needed)
 cd vscode && npm run test:integration              # inside real VS Code (uses the installed one)
 python maya/install.py [--copy | --uninstall]     # developer install of the Maya module, then restart Maya
-cd vscode && npm install && npm run package        # builds maya-expressions-<version>.vsix
-code --install-extension vscode/maya-expressions-<version>.vsix
+cd vscode && npm install && npm run package        # builds expression-bridge-<version>.vsix
+code --install-extension vscode/expression-bridge-<version>.vsix
 ```
 `python maya/install.py` (link mode) and the release installer write the same `.mod` file. The last one run wins:
 run `install.py` again to go back to editing this checkout live.
@@ -62,7 +62,7 @@ because editing in the Expression Editor fires no event. Selection uses the `Sel
 Echo suppression: a write from VS Code records its new hash, so the next poll does not push it back.
 In VS Code, clean editors reload. A dirty editor keeps its old hash, so its next save fails as a
 conflict instead of overwriting Maya's edit. The tree highlights Maya's selection
-(setting `mayaExpressions.followMayaSelection`).
+(setting `expressionBridge.followMayaSelection`).
 
 ## Errors (M6)
 `set` returns `errors: [{line, message}]`. While the write runs, `errors.py` listens to Maya's

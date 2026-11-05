@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const diagnostics = vscode.languages.createDiagnosticCollection("maya");
   const fsProvider = new ExpressionFileSystem(client, diagnostics);
   const tree = new ExpressionTreeProvider(client);
-  const treeView = vscode.window.createTreeView("mayaExpressions.tree", { treeDataProvider: tree });
+  const treeView = vscode.window.createTreeView("expressionBridge.tree", { treeDataProvider: tree });
   const settingsView = new SettingsViewProvider(client, ({ object, id }) =>
     fsProvider.notifyChanged(uriFor(object, id)),
   );
@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const setStatus = (connected: boolean) => {
     status.text = connected ? "$(plug) Maya" : "$(debug-disconnect) Maya";
     status.tooltip = connected ? "Connected to Maya" : "Not connected. Click to connect.";
-    status.command = connected ? "mayaExpressions.refresh" : "mayaExpressions.connect";
+    status.command = connected ? "expressionBridge.refresh" : "expressionBridge.connect";
     status.show();
   };
 
@@ -69,7 +69,7 @@ export function activate(context: vscode.ExtensionContext): void {
   });
 
   client.on("selectionChanged", ({ objects }: SelectionChanged) => {
-    if (!vscode.workspace.getConfiguration("mayaExpressions").get<boolean>("followMayaSelection", true)) {
+    if (!vscode.workspace.getConfiguration("expressionBridge").get<boolean>("followMayaSelection", true)) {
       return;
     }
     const node = objects.map((name) => tree.objectNode(name)).find((n) => n !== undefined);
@@ -122,22 +122,22 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }),
     vscode.window.onDidChangeActiveTextEditor(followEditor),
-    vscode.commands.registerCommand("mayaExpressions.connect", () => connect(false)),
-    vscode.commands.registerCommand("mayaExpressions.refresh", run(() => tree.refresh())),
-    vscode.commands.registerCommand("mayaExpressions.selectInMaya", run(async (node?: Node) => {
+    vscode.commands.registerCommand("expressionBridge.connect", () => connect(false)),
+    vscode.commands.registerCommand("expressionBridge.refresh", run(() => tree.refresh())),
+    vscode.commands.registerCommand("expressionBridge.selectInMaya", run(async (node?: Node) => {
       if (node?.type === "object") {
         await client.select(node.name);
       }
     })),
-    vscode.commands.registerCommand("mayaExpressions.setUnitConversion", run(async (node?: Node) => {
+    vscode.commands.registerCommand("expressionBridge.setUnitConversion", run(async (node?: Node) => {
       const pick = await vscode.window.showQuickPick(["all", "none", "angularOnly"], { title: "Convert Units" });
       if (pick) {
         await updateSettings(node, { unitConversion: pick as ExpressionSettings["unitConversion"] });
       }
     })),
-    vscode.commands.registerCommand("mayaExpressions.installBridge", run(() => installBridge(context))),
-    vscode.commands.registerCommand("mayaExpressions.uninstallBridge", run(() => uninstallBridge())),
-    vscode.commands.registerCommand("mayaExpressions.toggleAlwaysEvaluate", run(async (node?: Node) => {
+    vscode.commands.registerCommand("expressionBridge.installBridge", run(() => installBridge(context))),
+    vscode.commands.registerCommand("expressionBridge.uninstallBridge", run(() => uninstallBridge())),
+    vscode.commands.registerCommand("expressionBridge.toggleAlwaysEvaluate", run(async (node?: Node) => {
       if (node?.type !== "expression") {
         return;
       }
@@ -168,7 +168,7 @@ async function installBridge(context: vscode.ExtensionContext): Promise<void> {
     restart,
   );
   if (picked === restart) {
-    void vscode.window.showInformationMessage("Close and reopen Maya, then open the Maya Expressions view.");
+    void vscode.window.showInformationMessage("Close and reopen Maya, then open the Expression Bridge view.");
   }
 }
 

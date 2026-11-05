@@ -11,7 +11,7 @@ import threading
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "MayaExpressionBridge" / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ExpressionBridge" / "scripts"))
 
 try:
     import maya.standalone
@@ -152,7 +152,7 @@ class RealMayaServerTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def test_list_get_set_over_socket(self):
-        session = json.loads((Path(self.tmp.name) / "MayaExpressionBridge" / "session.json").read_text())
+        session = json.loads((Path(self.tmp.name) / "ExpressionBridge" / "session.json").read_text())
         self.assertEqual(session["mayaVersion"], "2026")
         with socket.create_connection(("127.0.0.1", self.port), timeout=10) as sock:
             stream = sock.makefile("rwb")

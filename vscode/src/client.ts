@@ -72,7 +72,7 @@ interface Pending {
 
 export function sessionFilePath(): string {
   const base = process.env.LOCALAPPDATA ?? path.join(os.homedir(), ".local", "share");
-  return path.join(base, "MayaExpressionBridge", "session.json");
+  return path.join(base, "ExpressionBridge", "session.json");
 }
 
 /**

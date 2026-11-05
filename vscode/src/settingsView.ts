@@ -21,7 +21,7 @@ type Inbound =
  * and posts intents; the extension validates them and talks to Maya.
  */
 export class SettingsViewProvider implements vscode.WebviewViewProvider {
-  static readonly viewId = "mayaExpressions.settings";
+  static readonly viewId = "expressionBridge.settings";
 
   private view?: vscode.WebviewView;
   private target?: Target;

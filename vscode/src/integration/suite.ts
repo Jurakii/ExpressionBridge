@@ -27,7 +27,7 @@ class FakeBridge {
 
   async start(): Promise<void> {
     await new Promise<void>((r) => this.server.listen(0, "127.0.0.1", r));
-    const dir = path.join(process.env.LOCALAPPDATA!, "MayaExpressionBridge");
+    const dir = path.join(process.env.LOCALAPPDATA!, "ExpressionBridge");
     fs.mkdirSync(dir, { recursive: true });
     const port = (this.server.address() as net.AddressInfo).port;
     fs.writeFileSync(path.join(dir, "session.json"),
@@ -115,22 +115,22 @@ async function waitFor<T>(what: string, fn: () => T | undefined | false, timeout
   }
 }
 
-const uri = vscode.Uri.from({ scheme: "maya-expr", path: "/pCube1/expr1.mel" });
+const uri = vscode.Uri.from({ scheme: "expr-bridge", path: "/pCube1/expr1.mel" });
 
 const tests: [string, (bridge: FakeBridge) => Promise<void>][] = [
   ["activates and contributes the MEL language and commands", async () => {
-    const ext = vscode.extensions.getExtension("local.maya-expressions");
+    const ext = vscode.extensions.getExtension("local.expression-bridge");
     assert.ok(ext, "extension is installed");
     await ext.activate();
     assert.ok((await vscode.languages.getLanguages()).includes("mel"));
     const commands = await vscode.commands.getCommands(true);
     for (const c of ["connect", "refresh", "selectInMaya", "setUnitConversion", "toggleAlwaysEvaluate"]) {
-      assert.ok(commands.includes(`mayaExpressions.${c}`), c);
+      assert.ok(commands.includes(`expressionBridge.${c}`), c);
     }
   }],
 
   ["connects to the bridge from session.json", async (bridge) => {
-    await vscode.commands.executeCommand("mayaExpressions.connect");
+    await vscode.commands.executeCommand("expressionBridge.connect");
     await waitFor("ping", () => bridge.calls.some((c) => c.method === "ping"));
     await waitFor("list", () => bridge.calls.some((c) => c.method === "list"));
   }],
@@ -193,12 +193,12 @@ const tests: [string, (bridge: FakeBridge) => Promise<void>][] = [
 
   ["right-click settings commands write to Maya", async (bridge) => {
     const node = { type: "expression", object: "pCube1", expr: { id: "expr1", kind: "expression", drives: [] } };
-    await vscode.commands.executeCommand("mayaExpressions.toggleAlwaysEvaluate", node);
+    await vscode.commands.executeCommand("expressionBridge.toggleAlwaysEvaluate", node);
     await waitFor("toggle", () => bridge.exprs.get("expr1")!.settings.alwaysEvaluate === false);
   }],
 
   ["select in Maya sends the object", async (bridge) => {
-    await vscode.commands.executeCommand("mayaExpressions.selectInMaya", { type: "object", name: "pCube1" });
+    await vscode.commands.executeCommand("expressionBridge.selectInMaya", { type: "object", name: "pCube1" });
     await waitFor("select", () => bridge.calls.some((c) => c.method === "select" && c.params.object === "pCube1"));
   }],
 ];

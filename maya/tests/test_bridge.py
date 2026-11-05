@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "MayaExpressionBridge" / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ExpressionBridge" / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from expression_bridge import adapter, dispatch, scanner, server, sync  # noqa: E402
@@ -134,7 +134,7 @@ class ServerTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def test_end_to_end_over_socket(self):
-        session_path = Path(self.tmp.name) / "MayaExpressionBridge" / "session.json"
+        session_path = Path(self.tmp.name) / "ExpressionBridge" / "session.json"
         session = json.loads(session_path.read_text())
         self.assertEqual(session["port"], self.port)
 
@@ -153,7 +153,7 @@ class ServerTests(unittest.TestCase):
         self.assertFalse(session_path.exists())
 
     def test_pushes_maya_edits_but_not_own_writes(self):
-        session = json.loads((Path(self.tmp.name) / "MayaExpressionBridge" / "session.json").read_text())
+        session = json.loads((Path(self.tmp.name) / "ExpressionBridge" / "session.json").read_text())
         with socket.create_connection(("127.0.0.1", self.port), timeout=5) as sock:
             stream = sock.makefile("rwb")
 

@@ -1,6 +1,6 @@
 {
-  "name": "maya-expressions",
-  "displayName": "Maya Expressions",
+  "name": "expression-bridge",
+  "displayName": "Expression Bridge",
   "description": "Browse and edit Maya expressions live from VS Code.",
   "version": "0.1.2",
   "publisher": "local",
@@ -15,91 +15,91 @@
   ],
   "main": "./out/extension.js",
   "activationEvents": [
-    "onFileSystem:maya-expr"
+    "onFileSystem:expr-bridge"
   ],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "mayaExpressions",
-          "title": "Maya Expressions",
+          "id": "expressionBridge",
+          "title": "Expression Bridge",
           "icon": "media/icon.svg"
         }
       ]
     },
     "views": {
-      "mayaExpressions": [
+      "expressionBridge": [
         {
-          "id": "mayaExpressions.tree",
+          "id": "expressionBridge.tree",
           "name": "Objects"
         },
         {
           "type": "webview",
-          "id": "mayaExpressions.settings",
+          "id": "expressionBridge.settings",
           "name": "Settings"
         }
       ]
     },
     "commands": [
       {
-        "command": "mayaExpressions.connect",
+        "command": "expressionBridge.connect",
         "title": "Maya: Connect"
       },
       {
-        "command": "mayaExpressions.refresh",
+        "command": "expressionBridge.refresh",
         "title": "Maya: Refresh",
         "icon": "$(refresh)"
       },
       {
-        "command": "mayaExpressions.selectInMaya",
+        "command": "expressionBridge.selectInMaya",
         "title": "Maya: Select Object in Maya",
         "icon": "$(target)"
       },
       {
-        "command": "mayaExpressions.setUnitConversion",
+        "command": "expressionBridge.setUnitConversion",
         "title": "Maya: Set Convert Units"
       },
       {
-        "command": "mayaExpressions.toggleAlwaysEvaluate",
+        "command": "expressionBridge.toggleAlwaysEvaluate",
         "title": "Maya: Toggle Always Evaluate"
       },
       {
-        "command": "mayaExpressions.installBridge",
+        "command": "expressionBridge.installBridge",
         "title": "Maya: Install Bridge into Maya"
       },
       {
-        "command": "mayaExpressions.uninstallBridge",
+        "command": "expressionBridge.uninstallBridge",
         "title": "Maya: Uninstall Bridge from Maya"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "mayaExpressions.refresh",
-          "when": "view == mayaExpressions.tree",
+          "command": "expressionBridge.refresh",
+          "when": "view == expressionBridge.tree",
           "group": "navigation"
         }
       ],
       "view/item/context": [
         {
-          "command": "mayaExpressions.selectInMaya",
+          "command": "expressionBridge.selectInMaya",
           "when": "viewItem == object",
           "group": "inline"
         },
         {
-          "command": "mayaExpressions.setUnitConversion",
+          "command": "expressionBridge.setUnitConversion",
           "when": "viewItem == expression"
         },
         {
-          "command": "mayaExpressions.toggleAlwaysEvaluate",
+          "command": "expressionBridge.toggleAlwaysEvaluate",
           "when": "viewItem == expression"
         }
       ]
     },
     "configuration": {
-      "title": "Maya Expressions",
+      "title": "Expression Bridge",
       "properties": {
-        "mayaExpressions.followMayaSelection": {
+        "expressionBridge.followMayaSelection": {
           "type": "boolean",
           "default": true,
           "description": "Highlight the object in the tree when it is selected in Maya."

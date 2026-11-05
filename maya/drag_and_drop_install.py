@@ -1,14 +1,14 @@
 """Drag this file into a Maya viewport to install the Expression Bridge.
 
-It copies the MayaExpressionBridge folder next to this file into Maya's modules
-folder, writes MayaExpressionBridge.mod, and starts the bridge right away, so no
+It copies the ExpressionBridge folder next to this file into Maya's modules
+folder, writes ExpressionBridge.mod, and starts the bridge right away, so no
 restart is needed. Maya loads it automatically from then on.
 """
 import os
 import shutil
 import sys
 
-NAME = "MayaExpressionBridge"
+NAME = "ExpressionBridge"
 
 
 def _modules_dir(cmds):
@@ -68,6 +68,6 @@ def onMayaDroppedPythonFile(*_):
         raise
     cmds.confirmDialog(
         title="Expression Bridge",
-        message="Installed to\n{}\n\nThe bridge is running. In VS Code, open the Maya Expressions view.".format(target),
+        message="Installed to\n{}\n\nThe bridge is running. In VS Code, open the Expression Bridge view.".format(target),
         button=["OK"],
     )

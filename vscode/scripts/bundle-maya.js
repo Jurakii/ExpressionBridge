@@ -2,7 +2,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const source = path.join(__dirname, "..", "..", "maya", "MayaExpressionBridge");
+const source = path.join(__dirname, "..", "..", "maya", "ExpressionBridge");
 const target = path.join(__dirname, "..", "resources", "maya-module");
 
 fs.rmSync(target, { recursive: true, force: true });

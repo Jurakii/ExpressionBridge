@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
-    Install (or uninstall) the Maya Expression Bridge: the Maya module and the VS Code extension.
+    Install (or uninstall) the Expression Bridge: the Maya module and the VS Code extension.
 
 .DESCRIPTION
     Run from an unpacked release folder (Install.bat calls this). It:
-      1. copies maya\MayaExpressionBridge into Maya's modules folder and writes MayaExpressionBridge.mod
-      2. installs vscode\maya-expressions-<version>.vsix with VS Code's `code` command
+      1. copies maya\ExpressionBridge into Maya's modules folder and writes ExpressionBridge.mod
+      2. installs vscode\expression-bridge-<version>.vsix with VS Code's `code` command
     Nothing else on the machine is changed. Run it again to upgrade; -Uninstall removes both parts.
 
 .EXAMPLE
@@ -29,8 +29,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$Name = 'MayaExpressionBridge'
-$ExtensionId = 'local.maya-expressions'
+$Name = 'ExpressionBridge'
+$ExtensionId = 'local.expression-bridge'
 $Root = Split-Path -Parent $PSScriptRoot   # the unpacked release folder
 $Package = Join-Path $Root "maya\$Name"
 
@@ -115,7 +115,7 @@ function Invoke-Code([string]$Code, [string[]]$Arguments) {
 }
 
 function Install-VSCodeExtension([string]$Version) {
-    $vsix = Join-Path $Root "vscode\maya-expressions-$Version.vsix"
+    $vsix = Join-Path $Root "vscode\expression-bridge-$Version.vsix"
     Write-Step "VS Code extension ($([IO.Path]::GetFileName($vsix)))"
     if (-not (Test-Path $vsix)) { throw "Missing $vsix" }
     $code = Find-CodeCli
@@ -134,7 +134,7 @@ function Install-VSCodeExtension([string]$Version) {
 function Uninstall-VSCodeExtension {
     Write-Step 'Removing the VS Code extension'
     $code = Find-CodeCli
-    if (-not $code) { Write-Note "VS Code's 'code' command was not found; remove 'Maya Expressions' in the Extensions view."; return }
+    if (-not $code) { Write-Note "VS Code's 'code' command was not found; remove 'Expression Bridge' in the Extensions view."; return }
     if ((Invoke-Code $code @('--uninstall-extension', $ExtensionId)) -eq 0) { Write-Ok 'Removed.' }
     else { Write-Note 'It was not installed.' }
 }
@@ -143,12 +143,12 @@ $dir = Get-ModulesDir
 if ($Uninstall) {
     if (-not $SkipMaya) { Uninstall-MayaModule $dir }
     if (-not $SkipVSCode) { Uninstall-VSCodeExtension }
-    Write-Host "`nMaya Expression Bridge uninstalled." -ForegroundColor Green
+    Write-Host "`nExpression Bridge uninstalled." -ForegroundColor Green
     exit 0
 }
 
 $version = Get-Version
-Write-Host "Maya Expression Bridge $version" -ForegroundColor White
+Write-Host "Expression Bridge $version" -ForegroundColor White
 if (-not $SkipMaya) { Install-MayaModule $dir $version }
 if (-not $SkipVSCode) { [void](Install-VSCodeExtension $version) }
 

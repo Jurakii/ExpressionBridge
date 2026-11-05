@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
 import { ExpressionsChanged, MayaClient, MayaDiagnostic, RpcError } from "./client";
 
-export const SCHEME = "maya-expr";
+export const SCHEME = "expr-bridge";
 const CONFLICT = -32009;
 const CONNECT_WAIT_MS = 10_000;
 const NOT_FOUND = -32004;
 
-/** `maya-expr:/<object>/<expressionId>.mel` <-> expression id. */
+/** `expr-bridge:/<object>/<expressionId>.mel` <-> expression id. */
 export function uriFor(object: string, id: string): vscode.Uri {
   return vscode.Uri.from({ scheme: SCHEME, path: `/${encodeURIComponent(object)}/${encodeURIComponent(id)}.mel` });
 }

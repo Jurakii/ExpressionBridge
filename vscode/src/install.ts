@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 
-export const MODULE_NAME = "MayaExpressionBridge";
+export const MODULE_NAME = "ExpressionBridge";
 
 /** Reads `__version__ = "x.y.z"` from the bundled Maya package. */
 export function readModuleVersion(moduleSource: string): string {
@@ -15,7 +15,7 @@ export function readModuleVersion(moduleSource: string): string {
   return match[1];
 }
 
-/** Text of `MayaExpressionBridge.mod`. Relative paths resolve against the .mod file's folder. */
+/** Text of `ExpressionBridge.mod`. Relative paths resolve against the .mod file's folder. */
 export function modText(version: string): string {
   return `+ ${MODULE_NAME} ${version} ./${MODULE_NAME}\r\nscripts: scripts\r\n`;
 }

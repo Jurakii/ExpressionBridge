@@ -1,7 +1,7 @@
 """Install the Maya module.
 
 Maya only reads `.mod` files at the top level of each MAYA_MODULE_PATH folder,
-so this writes `MayaExpressionBridge.mod` there.
+so this writes `ExpressionBridge.mod` there.
 
     python install.py            # link: .mod points at this checkout (for development)
     python install.py --copy     # copy the package into the modules folder
@@ -15,7 +15,7 @@ import shutil
 import sys
 from pathlib import Path
 
-NAME = "MayaExpressionBridge"
+NAME = "ExpressionBridge"
 SOURCE = Path(__file__).resolve().parent / NAME
 
 

@@ -14,9 +14,9 @@ Edit Maya expressions in VS Code instead of Maya's Expression Editor.
 
 ```
 ┌──────────── Maya (Python) ────────────┐        ┌──────── VS Code (TypeScript) ────────┐
-│ expression_bridge package             │        │ maya-expressions extension           │
+│ expression_bridge package             │        │ expression-bridge extension           │
 │  - scanner: finds expression nodes    │ JSON   │  - TreeView: objects → expressions   │
-│  - adapter: get/set expr + settings   │◄──────►│  - TextDocument provider (maya-expr:)│
+│  - adapter: get/set expr + settings   │◄──────►│  - TextDocument provider (expr-bridge:)│
 │  - server: localhost TCP, JSON-RPC    │  TCP   │  - Settings panel (webview)          │
 │  - scriptJobs: push changes to VS Code│ 127.0.0.1 │  - Diagnostics (Maya errors)      │
 │  - runs on Maya main thread only      │ + token│  - Status bar: connected/disconnected│
@@ -31,7 +31,7 @@ Edit Maya expressions in VS Code instead of Maya's Expression Editor.
 
 ### Discovery and security
 
-- Maya writes `%LOCALAPPDATA%\MayaExpressionBridge\session.json` containing `{port, token, mayaVersion, pid}` on start.
+- Maya writes `%LOCALAPPDATA%\ExpressionBridge\session.json` containing `{port, token, mayaVersion, pid}` on start.
 - VS Code reads that file, connects to `127.0.0.1:<port>`, and sends the token with every request.
 - Bind to `127.0.0.1` only. Never accept non-local connections.
 
@@ -86,8 +86,8 @@ Run every write inside `cmds.undoInfo(openChunk=True)` … `closeChunk()` so Ctr
 ## 4. VS Code extension details
 
 - **Language:** TypeScript, built with `yo code` (VS Code extension generator).
-- **Tree view:** `contributes.views` in a "Maya Expressions" side panel. Children are expressions; parent is object. Refresh on push events from Maya.
-- **Editing:** a `TextDocumentContentProvider` on the custom scheme `maya-expr:`, e.g. `maya-expr:/pCube1/expr1.mel`. Save hook (`onDidSaveTextDocument`) sends `setExpression` to Maya.
+- **Tree view:** `contributes.views` in a "Expression Bridge" side panel. Children are expressions; parent is object. Refresh on push events from Maya.
+- **Editing:** a `TextDocumentContentProvider` on the custom scheme `expr-bridge:`, e.g. `expr-bridge:/pCube1/expr1.mel`. Save hook (`onDidSaveTextDocument`) sends `setExpression` to Maya.
 - **Language modes:** `mel` and `python`. Use an existing MEL grammar for highlighting, or ship a small TextMate grammar. Python uses built-in highlighting.
 - **Settings panel:** a webview with dropdowns/checkboxes for Convert Units, Always Evaluate, and Particle slot. Changes call the same `setExpression` RPC.
 - **Connection state:** status bar item. Auto-reconnect when Maya restarts (re-read `session.json`).
@@ -97,8 +97,8 @@ Run every write inside `cmds.undoInfo(openChunk=True)` … `closeChunk()` so Ctr
 
 - Folder layout:
   ```
-  MayaExpressionBridge/
-    MayaExpressionBridge.mod      # tells Maya where the package lives
+  ExpressionBridge/
+    ExpressionBridge.mod      # tells Maya where the package lives
     scripts/
       userSetup.py                # starts the server on Maya launch
       expression_bridge/

@@ -15,7 +15,7 @@ Three copies of the install logic exist (PowerShell, Python in `install.py`, Pyt
 
 Not directly. VS Code can't drop a file into another application. It can do the same job in two ways:
 
-- **A. "Maya: Install Bridge" command in VS Code (recommended, works with Maya closed).** The VSIX bundles the Maya module as a folder. The command copies it into Maya's modules folder and writes `MayaExpressionBridge.mod`, all from TypeScript with Node's `fs`. No PowerShell and no `.bat`. It finds the modules folder the same way Maya does:
+- **A. "Maya: Install Bridge" command in VS Code (recommended, works with Maya closed).** The VSIX bundles the Maya module as a folder. The command copies it into Maya's modules folder and writes `ExpressionBridge.mod`, all from TypeScript with Node's `fs`. No PowerShell and no `.bat`. It finds the modules folder the same way Maya does:
   1. `MAYA_APP_DIR` if set, else
   2. the Documents folder from `reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Personal` (this follows OneDrive redirection).
 - **B. Hot install into a running Maya.** Once the bridge is connected, VS Code sends a new RPC `installModule {path}`. Maya runs the same logic as `drag_and_drop_install.py` (stop the old server, copy, restart) with no restart. Only useful after A has run once, so it is a second step.
@@ -24,7 +24,7 @@ The "drag into Maya" feel stays with `drag_and_drop_install.py` for people who d
 
 ## 3. Target experience
 
-1. Download **one file**: `maya-expression-bridge-<version>.vsix`.
+1. Download **one file**: `expression-bridge-<version>.vsix`.
 2. In VS Code: **Install from VSIX** (or double-click it if VS Code is set as the handler).
 3. A notification appears: **"Install the bridge into Maya?"** → **Install**. The module is copied and the `.mod` written.
 4. Restart Maya (or click **Install & Start Now** if Maya is already open and the bridge is connected, which uses B).
@@ -33,8 +33,8 @@ Nothing else to run. Uninstall is a VS Code command: **Maya: Uninstall Bridge**.
 
 ## 4. Build changes
 
-- `tools/build_release.py`: copy `maya/MayaExpressionBridge` into `vscode/resources/maya-module/` before `npm run package`. The `.vscodeignore` must not drop it. The zip then only needs the VSIX plus `INSTALL.md`.
-- `vscode/src/install.ts` (new): `installModule(source, modulesDir)`, `writeMod(...)`, `findModulesDir()`, and `uninstallModule(...)`. Register `mayaExpressions.installBridge` and `mayaExpressions.uninstallBridge`.
+- `tools/build_release.py`: copy `maya/ExpressionBridge` into `vscode/resources/maya-module/` before `npm run package`. The `.vscodeignore` must not drop it. The zip then only needs the VSIX plus `INSTALL.md`.
+- `vscode/src/install.ts` (new): `installModule(source, modulesDir)`, `writeMod(...)`, `findModulesDir()`, and `uninstallModule(...)`. Register `expressionBridge.installBridge` and `expressionBridge.uninstallBridge`.
 - Keep `installer/install.ps1` and `Install.bat` for scripted and pipeline installs. They become optional.
 - Tests: extend `maya/tests/test_install.py` with the same cases, and add `vscode/src/test/install.test.ts` for `.mod` text, modules-dir resolution (env var, registry, default) and copy/replace. Run the mod-loads check with mayapy as before.
 

@@ -20,7 +20,7 @@ function installedVsCode(): string | undefined {
 }
 
 async function main(): Promise<void> {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "maya-expr-it-"));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "expr-bridge-it-"));
   try {
     await runTests({
       vscodeExecutablePath: installedVsCode(),

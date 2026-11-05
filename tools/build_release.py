@@ -1,14 +1,14 @@
-"""Build the release zip: dist/MayaExpressionBridge-<version>.zip
+"""Build the release zip: dist/ExpressionBridge-<version>.zip
 
     python tools/build_release.py [--skip-vsix]
 
 Layout of the zip:
-    MayaExpressionBridge-<version>/
+    ExpressionBridge-<version>/
         Install.bat, Uninstall.bat, INSTALL.md
         installer/install.ps1
-        maya/MayaExpressionBridge/...        (the Maya module)
+        maya/ExpressionBridge/...        (the Maya module)
         maya/drag_and_drop_install.py
-        vscode/maya-expressions-<version>.vsix
+        vscode/expression-bridge-<version>.vsix
 """
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc")
 
 
 def maya_version():
-    init = ROOT / "maya" / "MayaExpressionBridge" / "scripts" / "expression_bridge" / "__init__.py"
+    init = ROOT / "maya" / "ExpressionBridge" / "scripts" / "expression_bridge" / "__init__.py"
     for line in init.read_text(encoding="utf-8").splitlines():
         if line.startswith("__version__"):
             return line.split("=", 1)[1].strip().strip('"')
@@ -54,11 +54,11 @@ def main(argv=None):
                          "Update maya/.../expression_bridge/__init__.py and vscode/package.json together.")
     if not args.skip_vsix:
         build_vsix()
-    vsix = ROOT / "vscode" / f"maya-expressions-{version}.vsix"
+    vsix = ROOT / "vscode" / f"expression-bridge-{version}.vsix"
     if not vsix.exists():
         raise SystemExit(f"Missing {vsix}")
 
-    name = f"MayaExpressionBridge-{version}"
+    name = f"ExpressionBridge-{version}"
     stage = DIST / name
     if stage.exists():
         shutil.rmtree(stage)
@@ -70,7 +70,7 @@ def main(argv=None):
     shutil.copy2(ROOT / "installer" / "Uninstall.bat", stage)
     shutil.copy2(ROOT / "installer" / "install.ps1", stage / "installer")
     shutil.copy2(ROOT / "INSTALL.md", stage)
-    shutil.copytree(ROOT / "maya" / "MayaExpressionBridge", stage / "maya" / "MayaExpressionBridge", ignore=IGNORE)
+    shutil.copytree(ROOT / "maya" / "ExpressionBridge", stage / "maya" / "ExpressionBridge", ignore=IGNORE)
     shutil.copy2(ROOT / "maya" / "drag_and_drop_install.py", stage / "maya")
     shutil.copy2(vsix, stage / "vscode")
 

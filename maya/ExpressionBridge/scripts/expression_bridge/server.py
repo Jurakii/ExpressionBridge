@@ -26,7 +26,7 @@ _session_file = None
 
 def session_dir():
     base = os.environ.get("LOCALAPPDATA") or str(Path.home() / ".local" / "share")
-    return Path(base) / "MayaExpressionBridge"
+    return Path(base) / "ExpressionBridge"
 
 
 def build_methods(cmds, on_main=dispatch.run_on_main, watcher=None):

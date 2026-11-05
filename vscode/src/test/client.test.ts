@@ -60,7 +60,7 @@ describe("MayaClient", () => {
   const oldAppData = process.env.LOCALAPPDATA;
 
   before(() => {
-    tmp = fs.mkdtempSync(path.join(os.tmpdir(), "maya-expr-"));
+    tmp = fs.mkdtempSync(path.join(os.tmpdir(), "expr-bridge-"));
     process.env.LOCALAPPDATA = tmp;
   });
 
@@ -70,8 +70,8 @@ describe("MayaClient", () => {
   });
 
   const writeSession = (port: number, protocol = 1) => {
-    fs.mkdirSync(path.join(tmp, "MayaExpressionBridge"), { recursive: true });
-    fs.writeFileSync(path.join(tmp, "MayaExpressionBridge", "session.json"),
+    fs.mkdirSync(path.join(tmp, "ExpressionBridge"), { recursive: true });
+    fs.writeFileSync(path.join(tmp, "ExpressionBridge", "session.json"),
       JSON.stringify({ port, token: TOKEN, pid: 1, mayaVersion: "2026", protocol }));
   };
 
