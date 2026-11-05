@@ -4,412 +4,246 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Expression Bridge</title>
-<meta name="description" content="Write Maya expressions in VS Code, with live two-way sync and Maya's errors in the Problems panel.">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<meta name="description" content="How to install and use Expression Bridge, which lets you edit Maya expressions in VS Code.">
 <style>
-/* Layout: one column that opens with a split hero (pitch left, download card right),
-   then a numbered install path, then the daily-use table and troubleshooting. */
 :root {
-  --bg: #f5f6f2;
-  --surface: #ffffff;
-  --ink: #16201c;
-  --muted: #5b6862;
-  --line: #d9ded8;
-  --accent: #0b6e5c;
-  --accent-ink: #ffffff;
-  --code-bg: #15201c;
-  --code-fg: #d8e6df;
-  --signal: #b5530d;
-  color-scheme: light;
+  --bg: #ffffff;
+  --ink: #1d2120;
+  --muted: #565f5c;
+  --line: #dde1df;
+  --code-bg: #f1f3f2;
+  --accent: #0a6b58;
+  --on-accent: #ffffff;
+  --select: #bfe8dd;
+  color-scheme: light dark;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f1613;
-    --surface: #17211d;
-    --ink: #e4ece7;
-    --muted: #9ba9a3;
-    --line: #2a3832;
-    --accent: #4fd1b1;
-    --accent-ink: #0a1410;
-    --code-bg: #0a100d;
-    --code-fg: #cfe3da;
-    --signal: #f0a25c;
-    color-scheme: dark;
+  :root {
+    --bg: #1b1e1e;
+    --ink: #e5e8e7;
+    --muted: #a8b0ad;
+    --line: #363b3a;
+    --code-bg: #282c2b;
+    --accent: #62d6b9;
+    --on-accent: #10211c;
+    --select: #2c5c50;
   }
-}
-:root[data-theme="dark"] {
-  --bg: #0f1613;
-  --surface: #17211d;
-  --ink: #e4ece7;
-  --muted: #9ba9a3;
-  --line: #2a3832;
-  --accent: #4fd1b1;
-  --accent-ink: #0a1410;
-  --code-bg: #0a100d;
-  --code-fg: #cfe3da;
-  --signal: #f0a25c;
-  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; }
+html { -webkit-text-size-adjust: 100%; scrollbar-color: var(--muted) var(--bg); }
 body {
+  margin: 0 auto;
+  max-width: 44rem;
+  padding: 56px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
   background: var(--bg);
   color: var(--ink);
-  font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 0 48px;
+  font: 17px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif;
 }
-.wrap { max-width: 1040px; margin: 0 auto; min-width: 0; }
-h1, h2, h3 { text-wrap: balance; line-height: 1.15; margin: 0; }
-p { margin: 0; text-wrap: pretty; max-width: 62ch; }
-code, .mono { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: 0.9em; }
-a { color: var(--accent); }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+::selection { background: var(--select); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* Top bar */
-.top {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding-block: 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap;
-}
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; }
-.mark {
-  width: 28px; height: 28px; border-radius: 7px; background: var(--accent); color: var(--accent-ink);
-  display: grid; place-items: center; font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 500;
-}
-.top nav { display: flex; gap: 20px; font-size: 14px; flex-wrap: wrap; }
-.top nav a { color: var(--muted); text-decoration: none; }
-.top nav a:hover { color: var(--ink); }
+h1, h2, h3 { line-height: 1.2; text-wrap: balance; font-weight: 600; }
+h1 { margin: 0; font-size: 2.25rem; }
+h2 { margin: 3.5rem 0 1rem; padding-top: 1.75rem; border-top: 1px solid var(--line); font-size: 1.6rem; scroll-margin-top: 16px; }
+h3 { margin: 2rem 0 .4rem; font-size: 1.1rem; }
+p, ol, ul { margin: 0 0 1rem; }
+ol, ul { padding-left: 1.5rem; }
+li { margin-bottom: .5rem; }
+li::marker { color: var(--muted); }
 
-/* Hero */
-.hero {
-  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 48px;
-  align-items: center; padding-block: 64px 56px;
+a { color: var(--accent); text-underline-offset: 3px; }
+code {
+  padding: .1em .3em; border-radius: 3px; background: var(--code-bg);
+  font: .88em Consolas, ui-monospace, Menlo, monospace; overflow-wrap: anywhere;
 }
-.eyebrow { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
-.hero h1 { font-size: clamp(36px, 5vw, 56px); font-weight: 700; letter-spacing: -0.02em; margin-top: 14px; }
-.hero .lede { font-size: 18px; color: var(--muted); margin-top: 20px; }
-.hero .lede strong { color: var(--ink); font-weight: 600; }
+kbd { font: inherit; font-weight: 600; }
 
-.card {
-  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 28px;
-  min-width: 0;
+.intro { margin-top: .75rem; font-size: 1.15rem; }
+.needs { color: var(--muted); }
+.download {
+  display: inline-block; padding: .6rem 1.1rem; border-radius: 6px;
+  background: var(--accent); color: var(--on-accent); font-weight: 600; text-decoration: none;
 }
-.card h2 { font-size: 20px; font-weight: 600; }
-.meta { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; margin: 20px 0 24px; font-size: 14px; }
-.meta dt { color: var(--muted); }
-.meta dd { margin: 0; }
-.btn {
-  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%;
-  background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 600;
-  padding: 14px 18px; border-radius: 8px; font-size: 16px; min-height: 48px;
-}
-.btn:hover { filter: brightness(1.06); }
-.btn small { font-weight: 400; opacity: 0.85; font-size: 14px; }
-.hash { margin-top: 16px; font-size: 13px; color: var(--muted); }
-.hash code { word-break: break-all; }
+.download:hover { text-decoration: underline; }
+.contents { margin-top: 1.5rem; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; }
+.contents li { margin: 0; }
 
-/* Sections */
-section { padding-block: 56px; border-top: 1px solid var(--line); }
-.sec-head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 32px; }
-.sec-head h2 { font-size: clamp(26px, 3.4vw, 34px); font-weight: 650; letter-spacing: -0.01em; }
-.sec-head p { color: var(--muted); }
+figure { margin: 1.5rem 0; }
+figure svg { display: block; width: 100%; max-width: 520px; height: auto; }
+svg .box { fill: var(--code-bg); stroke: var(--line); }
+svg .wire { fill: none; stroke: var(--muted); stroke-width: 1.25; }
+svg .head { fill: var(--muted); }
+svg text { fill: var(--ink); font: 13px "Segoe UI", system-ui, sans-serif; text-anchor: middle; }
+svg .name { font-size: 15px; font-weight: 600; }
+svg .small { fill: var(--muted); font-size: 12px; }
 
-/* Three ways it works */
-.flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.flow .card h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
-.flow .card p { color: var(--muted); font-size: 15px; }
-.flow .tag { font-size: 12px; color: var(--accent); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 12px; display: block; }
-
-/* Code preview */
-.preview {
-  margin-top: 24px; background: var(--code-bg); color: var(--code-fg); border-radius: 12px; overflow: hidden;
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-}
-.pane { padding: 22px; min-width: 0; }
-.pane + .pane { border-left: 1px solid #2c3d36; }
-.pane-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; opacity: 0.6; margin-bottom: 12px; }
-.pane pre { margin: 0; font-family: "IBM Plex Mono", monospace; font-size: 14px; line-height: 1.7; overflow-x: auto; white-space: pre; }
-.pane .dim { opacity: 0.5; }
-.problem {
-  display: flex; gap: 10px; align-items: flex-start; font-size: 14px; background: #2a1a0f; color: #f6c99a;
-  border-left: 3px solid var(--signal); padding: 10px 12px; border-radius: 6px; margin-top: 14px;
-}
-.problem b { color: #ffd9ae; font-weight: 600; }
-
-/* Install tabs */
-.tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 24px; max-width: 100%; overflow-x: auto; }
-.tabs button {
-  font: inherit; font-size: 15px; color: var(--muted); background: none; border: 0; padding: 8px 16px;
-  border-radius: 7px; cursor: pointer; white-space: nowrap;
-}
-.tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); font-weight: 600; }
-.panel[hidden] { display: none !important; }
-.steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; counter-reset: s; }
-.steps li {
-  counter-increment: s; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 16px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px;
-}
-.steps li::before {
-  content: counter(s); width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--accent);
-  color: var(--accent); display: grid; place-items: center; font-weight: 600; font-size: 14px; margin-top: 2px;
-}
-.steps h3 { font-size: 17px; font-weight: 600; }
-.steps p, .steps ul { margin-top: 6px; color: var(--muted); font-size: 15px; }
-.steps ul { padding-left: 20px; margin-bottom: 0; }
-.cmd {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; background: var(--code-bg); color: var(--code-fg);
-  border-radius: 8px; padding: 10px 12px 10px 14px; font-family: "IBM Plex Mono", monospace; font-size: 14px;
-}
-.cmd code { flex: 1 1 200px; min-width: 0; overflow-x: auto; white-space: nowrap; }
-.copy {
-  font: inherit; font-size: 13px; color: var(--code-fg); background: transparent; border: 1px solid #3a4d45;
-  padding: 4px 10px; border-radius: 6px; cursor: pointer;
-}
-.copy:hover { border-color: var(--accent); color: var(--accent); }
-.note { margin-top: 20px; font-size: 14px; color: var(--muted); }
-.note strong { color: var(--ink); }
-
-/* Use table */
-.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
-table { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
-th, td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { font-size: 13px; color: var(--muted); font-weight: 500; letter-spacing: 0.02em; }
-tr:last-child td { border-bottom: 0; }
-td:first-child { font-weight: 600; white-space: nowrap; }
-
-/* Troubleshooting */
-details { border-bottom: 1px solid var(--line); padding-block: 16px; }
-details:first-of-type { border-top: 1px solid var(--line); }
-summary { cursor: pointer; font-weight: 600; font-size: 16px; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
-summary::-webkit-details-marker { display: none; }
-summary::after { content: "+"; color: var(--muted); font-weight: 400; font-size: 20px; line-height: 1; }
-details[open] summary::after { content: "−"; }
-details p { color: var(--muted); font-size: 15px; margin-top: 10px; }
-
-/* Requirements */
-.reqs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.reqs .card { padding: 22px; }
-.reqs .k { font-size: 13px; color: var(--muted); }
-.reqs .v { font-size: 17px; font-weight: 600; margin-top: 4px; }
-
-footer { border-top: 1px solid var(--line); padding-block: 28px 0; font-size: 14px; color: var(--muted); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-
-/* Narrow screens */
-@media (max-width: 860px) {
-  .hero { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 40px 40px; }
-  .flow, .reqs { grid-template-columns: minmax(0, 1fr); }
-  .preview { grid-template-columns: minmax(0, 1fr); }
-  .pane + .pane { border-left: 0; border-top: 1px solid #2c3d36; }
-}
-@media (max-width: 480px) {
-  .top nav { gap: 14px; font-size: 13px; }
-  .card { padding: 22px; }
-}
+footer { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <header class="top">
-    <div class="brand"><span class="mark">{ }</span> Expression Bridge</div>
-    <nav aria-label="Page sections">
-      <a href="#how">How it works</a>
-      <a href="#install">Install</a>
-      <a href="#use">Use</a>
-      <a href="#help">Troubleshooting</a>
-    </nav>
-  </header>
+<header>
+  <h1>Expression Bridge</h1>
+  <p class="intro">Edit Maya expressions in VS Code. Saving updates Maya, edits in Maya appear in VS Code, and Maya's
+    errors show in the Problems panel.</p>
+  <p class="needs">Version 1.0.0. Needs Windows 10 or 11, Maya 2024, 2025 or 2026, and VS Code 1.90 or newer.</p>
+  <a class="download" href="https://github.com/Jurakii/ExpressionBridge/releases/download/v1.0.0/ExpressionBridge-1.0.0.zip">Download ExpressionBridge-1.0.0.zip</a>
+  <nav aria-label="On this page">
+    <ul class="contents">
+      <li><a href="#install">Install</a></li>
+      <li><a href="#use">Use</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#help">Troubleshooting</a></li>
+    </ul>
+  </nav>
+</header>
 
-  <div class="hero">
-    <div>
-      <div class="eyebrow">For Maya artists and TDs on Windows</div>
-      <h1>Write Maya expressions in VS Code.</h1>
-      <p class="lede">Save in VS Code and Maya updates. Edit in Maya and VS Code follows. Maya's errors land in the
-        Problems panel on the right line. <strong>Version 1.0.0.</strong></p>
-    </div>
+<main>
+  <h2 id="install">Install</h2>
+  <ol>
+    <li>Unzip <code>ExpressionBridge-1.0.0.zip</code> anywhere.</li>
+    <li>Double-click <code>Install.bat</code>. It copies the Maya module into <code>Documents\maya\modules</code> and
+      installs the extension into VS Code.</li>
+    <li>Start Maya, or restart it if it was open. An <strong>Expression Bridge</strong> menu appears in the main menu
+      bar.</li>
+    <li>In VS Code, click <strong>Restart Extensions</strong> if prompted, then click the <strong>M</strong> icon in the
+      activity bar.</li>
+  </ol>
+  <p>You can delete the unzipped folder afterwards. Everything is copied into place.</p>
 
-    <aside class="card" aria-labelledby="dl-title">
-      <h2 id="dl-title">Download Expression Bridge</h2>
-      <dl class="meta">
-        <dt>Version</dt><dd>1.0.0, released 5 Nov 2026</dd>
-        <dt>Works with</dt><dd>Maya 2024, 2025, 2026</dd>
-        <dt>Needs</dt><dd>Windows 10 or 11, VS Code 1.90+</dd>
-        <dt>Contents</dt><dd>Maya module, VS Code extension, installer</dd>
-      </dl>
-      <a class="btn" href="https://github.com/Jurakii/ExpressionBridge/releases/download/v1.0.0/ExpressionBridge-1.0.0.zip" aria-describedby="dl-note">Download ExpressionBridge-1.0.0.zip</a>
-      <p class="hash" id="dl-note">Unzip anywhere, then double-click <code>Install.bat</code>. You can delete the folder
-        afterwards.</p>
-    </aside>
-  </div>
+  <h3>Other ways to install</h3>
+  <ul>
+    <li><strong>From VS Code alone:</strong> install the VSIX, then run <strong>Maya: Install Bridge into Maya</strong>
+      from the Command Palette and restart Maya. <strong>Maya: Uninstall Bridge from Maya</strong> removes it again.</li>
+    <li><strong>Maya only, without a restart:</strong> drag <code>maya\drag_and_drop_install.py</code> into a Maya
+      viewport. It installs and starts the bridge right away.</li>
+    <li id="vsix"><strong>VS Code only:</strong> open Extensions, click <strong>...</strong> at the top right, choose
+      <strong>Install from VSIX...</strong>, and pick <code>vscode\expression-bridge-1.0.0.vsix</code>.</li>
+    <li><strong>From PowerShell, with options:</strong>
+      <code>installer\install.ps1 [-SkipMaya] [-SkipVSCode] [-ModulesDir &lt;folder&gt;] [-CodeCli &lt;path to code.cmd&gt;]</code>.
+      If you set <code>MAYA_APP_DIR</code>, the module goes into <code>%MAYA_APP_DIR%\modules</code>.</li>
+  </ul>
 
-  <section id="how" aria-labelledby="how-title">
-    <div class="sec-head">
-      <div class="eyebrow">How it works</div>
-      <h2 id="how-title">Two editors, one expression</h2>
-      <p>Maya stays the source of truth. The bridge keeps VS Code in step with it.</p>
-    </div>
+  <h3>Update</h3>
+  <p>Unzip the new version and run <code>Install.bat</code> again, then restart Maya and click <strong>Restart
+    Extensions</strong> in VS Code.</p>
 
-    <div class="flow">
-      <article class="card">
-        <span class="tag">Edit</span>
-        <h3>Change it in VS Code</h3>
-        <p>Open an object's expressions from the tree, edit with MEL highlighting, and press Ctrl+S to push the change
-          into Maya as a single undoable step.</p>
-      </article>
-      <article class="card">
-        <span class="tag">Sync</span>
-        <h3>See Maya's edits within a second</h3>
-        <p>Changes made in the Expression Editor show up in VS Code. A clean editor reloads by itself. A dirty one asks
-          before anything is overwritten.</p>
-      </article>
-      <article class="card">
-        <span class="tag">Check</span>
-        <h3>Find errors on the right line</h3>
-        <p>Maya's syntax and runtime errors appear in Problems. Maya keeps the last working version, so a typo never
-          breaks the scene.</p>
-      </article>
-    </div>
+  <h3>Uninstall</h3>
+  <p>Double-click <code>Uninstall.bat</code>, or run <code>installer\install.ps1 -Uninstall</code>. This removes the
+    module and the <code>.mod</code> file from Maya's modules folder, and the extension from VS Code.</p>
 
-    <div class="preview" role="img" aria-label="Left: an expression in VS Code. Right: the Problems panel showing a Maya error on line 3.">
-      <div class="pane">
-        <div class="pane-title">VS Code · pCube1 · translateY</div>
-        <pre><span class="dim">1</span>  float $t = `time`;
-<span class="dim">2</span>  translateY = sin($t * 2) * 3;
-<span class="dim">3</span>  translateX = $t *  ;</pre>
-      </div>
-      <div class="pane">
-        <div class="pane-title">Problems · source Maya</div>
-        <pre>Line 3   Syntax error
-         Maya kept the previous expression</pre>
-        <div class="problem"><span aria-hidden="true">⚠</span><span><b>Syntax error</b> on line 3. The scene still runs
-          on the last valid version.</span></div>
-      </div>
-    </div>
-  </section>
+  <h3>Check the download</h3>
+  <p>In PowerShell, run <code>Get-FileHash ExpressionBridge-1.0.0.zip -Algorithm SHA256</code> and compare the result
+    with <a href="https://github.com/Jurakii/ExpressionBridge/releases/download/v1.0.0/ExpressionBridge-1.0.0.zip.sha256">ExpressionBridge-1.0.0.zip.sha256</a>.</p>
 
-  <section id="install" aria-labelledby="install-title">
-    <div class="sec-head">
-      <div class="eyebrow">Install</div>
-      <h2 id="install-title">Set up in about two minutes</h2>
-      <p>The installer copies the Maya module and the VS Code extension into place.</p>
-    </div>
+  <h2 id="use">Use</h2>
 
-    <div>
-      <ol class="steps">
-        <li>
-          <div>
-            <h3>Download and unzip</h3>
-            <p>Save <code>ExpressionBridge-1.0.0.zip</code> and extract it to any folder, such as Downloads.</p>
-          </div>
-        </li>
-        <li>
-          <div>
-            <h3>Run the installer</h3>
-            <p>Double-click <code>Install.bat</code>. It copies the Maya module into your Documents\maya\modules folder and
-              installs the VS Code extension.</p>
-          </div>
-        </li>
-        <li>
-          <div>
-            <h3>Start Maya</h3>
-            <p>Start Maya, or restart it if it was open. An <strong>Expression Bridge</strong> menu appears in the main menu bar.</p>
-          </div>
-        </li>
-        <li>
-          <div>
-            <h3>Connect VS Code</h3>
-            <p>If VS Code asks, click <strong>Restart Extensions</strong>. Then click the <strong>M</strong> icon in the
-              activity bar.</p>
-          </div>
-        </li>
-      </ol>
-      <p class="note">Verify the download first if you like. In PowerShell, run
-        <code>Get-FileHash ExpressionBridge-1.0.0.zip -Algorithm SHA256</code> and compare the result with the value in
-        <code>ExpressionBridge-1.0.0.zip.sha256</code>.</p>
-    </div>
+  <h3>Edit an expression</h3>
+  <ol>
+    <li>Click the <strong>M</strong> icon in VS Code. <strong>Objects</strong> lists every object that has
+      expressions.</li>
+    <li>Click an expression and edit it.</li>
+    <li>Press <kbd>Ctrl+S</kbd>. Maya updates.</li>
+  </ol>
+  <p>To undo the whole save, press <kbd>Ctrl+Z</kbd> in Maya.</p>
 
-    <p class="note">If <code>Install.bat</code> can't find VS Code, or PowerShell scripts are blocked, the Troubleshooting
-      section below shows the manual steps.</p>
-  </section>
+  <h3>Fix an error</h3>
+  <p>Maya's errors appear in the Problems panel on the line they came from. After a syntax error, Maya keeps the last
+    working version of the expression until you save a fixed one.</p>
 
-  <section id="use" aria-labelledby="use-title">
-    <div class="sec-head">
-      <div class="eyebrow">Use</div>
-      <h2 id="use-title">Everyday tasks</h2>
-      <p>Most of the time you only need the tree, the editor and the Problems panel.</p>
-    </div>
+  <h3>Edit in Maya as well</h3>
+  <p>Changes made in Maya, for example in the Expression Editor, appear in VS Code within about a second. If you have
+    unsaved changes to the same expression, your next save is refused so that it can't overwrite Maya's edit. Revert
+    the file in VS Code to load Maya's version.</p>
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th scope="col">To</th><th scope="col">Do this</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>See expressions</td><td>Click the <strong>M</strong> icon. The tree lists every object that has expressions.</td></tr>
-          <tr><td>Edit one</td><td>Click an expression, edit it, then press <strong>Ctrl+S</strong>. Maya updates.</td></tr>
-          <tr><td>Undo a save</td><td>Press <strong>Ctrl+Z</strong> in Maya. The whole save is undone at once.</td></tr>
-          <tr><td>Read an error</td><td>Open Problems. Maya's error shows on the line it came from.</td></tr>
-          <tr><td>Change settings</td><td>Use the Settings panel under the tree: Convert units and Always evaluate apply at once.</td></tr>
-          <tr><td>Select in Maya</td><td>Hover an object in the tree and click the target icon.</td></tr>
-          <tr><td>Follow Maya's selection</td><td>On by default. Turn it off with <code>expressionBridge.followMayaSelection</code>.</td></tr>
-          <tr><td>Start or stop the bridge</td><td>In Maya, open Expression Bridge and choose Start, Stop or Status.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+  <h3>Change an expression's settings</h3>
+  <p>The <strong>Settings</strong> panel under the tree shows Convert Units, Always Evaluate and the plugs the
+    expression drives. Changes apply at once. You can also right-click an expression to set Convert Units or Always
+    Evaluate.</p>
 
-  <section id="help" aria-labelledby="help-title">
-    <div class="sec-head">
-      <div class="eyebrow">Help</div>
-      <h2 id="help-title">Troubleshooting</h2>
-    </div>
+  <h3>Work with selection</h3>
+  <p>To select an object in Maya, hover it in the tree and click the target icon. The tree also highlights Maya's
+    selection. To turn that off, use the setting <code>expressionBridge.followMayaSelection</code>.</p>
 
-    <details>
-      <summary>The status bar shows Maya with a broken plug</summary>
-      <p>Make sure Maya is open, then choose Expression Bridge, then Start. VS Code retries every 3 seconds. Click the
-        status bar item to retry now and see the error.</p>
-    </details>
-    <details>
-      <summary>There is no Expression Bridge menu in Maya</summary>
-      <p>Check that <code>Documents\maya\modules\ExpressionBridge.mod</code> exists, then restart Maya.</p>
-    </details>
-    <details>
-      <summary>I have two copies of Maya open</summary>
-      <p>VS Code connects to the Maya that started its bridge last. In the one you want, choose Stop and then Start.</p>
-    </details>
-    <details>
-      <summary>Install.bat says the code command wasn't found</summary>
-      <p>Install the extension by hand. In VS Code, open Extensions, click <strong>...</strong> at the top right, choose
-        <strong>Install from VSIX...</strong>, and pick <code>vscode\expression-bridge-1.0.0.vsix</code> from the unzipped folder.</p>
-    </details>
-    <details>
-      <summary>My company blocks PowerShell scripts</summary>
-      <p>Drag <code>maya\drag_and_drop_install.py</code> from the unzipped folder into a Maya viewport. Then install the
-        extension from the VSIX, as described above.</p>
-    </details>
-  </section>
+  <h3>Particle expressions</h3>
+  <p>Creation, runtime before dynamics and runtime after dynamics show as separate entries under the particle shape.
+    Maya rewrites their text when saved (<code>lifespanPP</code> becomes <code>particleShape1.lifespanPP</code>), and
+    the editor reloads with Maya's version.</p>
 
-  <section id="download" aria-labelledby="final-title">
-    <div class="card" style="display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;">
-      <div style="min-width:0; flex:1 1 280px;">
-        <h2 id="final-title">Ready when you are</h2>
-        <p class="hash" style="margin-top:6px;">Expression Bridge 1.0.0 for Windows. Works with Maya 2024 to 2026 and VS Code 1.90 or newer.</p>
-      </div>
-      <a class="btn" style="width:auto; flex:0 0 auto;" href="https://github.com/Jurakii/ExpressionBridge/releases/download/v1.0.0/ExpressionBridge-1.0.0.zip">Download 1.0.0 <small>.zip</small></a>
-    </div>
-  </section>
+  <h3>Start and stop the bridge</h3>
+  <p>The bridge starts with Maya. To control it, use <strong>Expression Bridge</strong> &gt; Start, Stop or Status in
+    Maya's menu bar.</p>
 
-  <footer>
-    <span>Expression Bridge 1.0.0 · Changes listed in the CHANGELOG</span>
-    <span>Bridge listens on 127.0.0.1 only. No firewall rule needed.</span>
-  </footer>
+  <h2 id="how">How it works</h2>
+  <p>There are two parts: a module that runs inside Maya, and an extension in VS Code. Expressions stay in your Maya
+    scene. VS Code opens them straight from Maya, so there are no script files to keep in step.</p>
 
-</div>
+  <figure>
+    <svg viewBox="0 0 420 236" role="img" aria-labelledby="diagram-title">
+      <title id="diagram-title">Maya and VS Code exchange saved text, changes and errors over a local connection. Maya writes the port and token to session.json, and VS Code reads them from it.</title>
+      <rect class="box" x="1" y="1" width="118" height="120" rx="4"/>
+      <text class="name" x="60" y="56">Maya</text>
+      <text class="small" x="60" y="76">bridge module</text>
+      <rect class="box" x="301" y="1" width="118" height="120" rx="4"/>
+      <text class="name" x="360" y="56">VS Code</text>
+      <text class="small" x="360" y="76">extension</text>
+
+      <path class="wire" d="M300 42H128"/>
+      <path class="head" d="M120 42l9-4.5v9z"/>
+      <text x="210" y="33">saved text</text>
+      <path class="wire" d="M120 88H292"/>
+      <path class="head" d="M300 88l-9-4.5v9z"/>
+      <text x="210" y="79">changes and errors</text>
+
+      <rect class="box" x="140" y="174" width="140" height="56" rx="4"/>
+      <text x="210" y="197">session.json</text>
+      <text class="small" x="210" y="216">port and token</text>
+      <path class="wire" d="M60 122V202H132"/>
+      <path class="head" d="M140 202l-9-4.5v9z"/>
+      <text class="small" x="96" y="194">writes</text>
+      <path class="wire" d="M280 202H360V130"/>
+      <path class="head" d="M360 122l-4.5 9h9z"/>
+      <text class="small" x="324" y="194">reads</text>
+    </svg>
+  </figure>
+
+  <p><strong>Connecting.</strong> When the bridge starts, Maya opens a server on <code>127.0.0.1</code> and writes its
+    port and a random token to <code>%LOCALAPPDATA%\ExpressionBridge\session.json</code>. VS Code reads that file,
+    connects, and sends the token with every request. The server only listens on this computer, so no firewall rule is
+    needed.</p>
+  <p><strong>Saving.</strong> VS Code sends the new text to Maya as one undoable edit. Maya refuses it if the expression
+    has changed since you opened it. Any errors Maya prints during the edit go back to the Problems panel.</p>
+  <p><strong>Staying in sync.</strong> Maya checks its expressions for changes every second and tells VS Code about any
+    it finds. The check runs on a timer because editing in the Expression Editor doesn't fire an event.</p>
+
+  <h2 id="help">Troubleshooting</h2>
+
+  <h3>The status bar shows Maya with a broken plug</h3>
+  <p>Make sure Maya is open, then choose <strong>Expression Bridge</strong> &gt; Start in Maya. VS Code retries every 3
+    seconds. Click the status bar item to retry now and see the error.</p>
+
+  <h3>There's no Expression Bridge menu in Maya</h3>
+  <p>Check that <code>Documents\maya\modules\ExpressionBridge.mod</code> exists, then restart Maya. In Maya's Script
+    Editor, <code>cmds.moduleInfo(listModules=True)</code> should include <code>ExpressionBridge</code>.</p>
+
+  <h3>Two copies of Maya are open</h3>
+  <p>VS Code talks to the one that started its bridge last. In the one you want, choose <strong>Expression
+    Bridge</strong> &gt; Stop, then Start.</p>
+
+  <h3><code>Install.bat</code> says the <code>code</code> command wasn't found</h3>
+  <p>Install the extension from the VSIX by hand, as described under <a href="#vsix">VS Code only</a>.</p>
+
+  <h3>Your company blocks PowerShell scripts</h3>
+  <p>Drag <code>maya\drag_and_drop_install.py</code> into a Maya viewport, then install the extension from the
+    <a href="#vsix">VSIX</a>.</p>
+</main>
+
+<footer>
+  <a href="https://github.com/Jurakii/ExpressionBridge">Source on GitHub</a> ·
+  <a href="https://github.com/Jurakii/ExpressionBridge/blob/main/CHANGELOG.md">Changelog</a> ·
+  <a href="https://github.com/Jurakii/ExpressionBridge/blob/main/LICENSE">MIT license</a>
+</footer>
 
 </body>
 </html>
