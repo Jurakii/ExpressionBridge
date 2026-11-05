@@ -4,7 +4,7 @@
 
 Layout of the zip:
     ExpressionBridge-<version>/
-        Install.bat, Uninstall.bat, INSTALL.md
+        Install.bat, Uninstall.bat, INSTALL.md, LICENSE
         installer/install.ps1
         maya/ExpressionBridge/...        (the Maya module)
         maya/drag_and_drop_install.py
@@ -70,6 +70,7 @@ def main(argv=None):
     shutil.copy2(ROOT / "installer" / "Uninstall.bat", stage)
     shutil.copy2(ROOT / "installer" / "install.ps1", stage / "installer")
     shutil.copy2(ROOT / "INSTALL.md", stage)
+    shutil.copy2(ROOT / "LICENSE", stage)
     shutil.copytree(ROOT / "maya" / "ExpressionBridge", stage / "maya" / "ExpressionBridge", ignore=IGNORE)
     shutil.copy2(ROOT / "maya" / "drag_and_drop_install.py", stage / "maya")
     shutil.copy2(vsix, stage / "vscode")
