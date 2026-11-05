@@ -137,7 +137,7 @@ on 1.0.0.
 - `scriptJob` returns `None` in batch mode, so `Watcher` ignores it.
 - `unitConversion` values other than `all`/`none`/`angularOnly` are silently stored as `all`. The bridge rejects them.
 - Maya rewrites particle expression text to prefix attributes with the shape
-  (`lifespanPP` becomes `particle1Shape.lifespanPP`). After saving, the editor reloads with Maya's version.
+  (`lifespanPP` becomes `particleShape1.lifespanPP`). After saving, the editor reloads with Maya's version.
 - `stat()` in the file system must return an `mtime` that changes only when Maya's content does, so VS Code's own
   "file changed on disk" check works.
 

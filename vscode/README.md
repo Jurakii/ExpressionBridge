@@ -8,4 +8,5 @@ running in Maya. Run **Maya: Install Bridge into Maya** from the Command Palette
 - Changes made in Maya reload here. Maya's selection is highlighted in the tree.
 - Right-click an expression to set Convert Units or Always Evaluate.
 
-Setting: `expressionBridge.followMayaSelection` (default on).
+Settings: `expressionBridge.followMayaSelection` (default on) and `expressionBridge.mayaModulesDir`, the folder the
+Install command uses (default: Maya's own).

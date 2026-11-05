@@ -55,6 +55,15 @@ export function findModulesDir(
   return path.join(docs ?? path.join(os.homedir(), "Documents"), "maya", "modules");
 }
 
+/** Maya's modules folder for a folder the user picked: a prefs folder, its parent, or a modules folder. */
+export function modulesDirFrom(folder: string): string {
+  const name = path.basename(folder).toLowerCase();
+  if (name === "modules") {
+    return folder;
+  }
+  return path.join(name === "prefs" ? path.dirname(folder) : folder, "modules");
+}
+
 /** Copies the bundled module into `modulesDir` and writes its .mod file, replacing any older copy. */
 export function installModule(moduleSource: string, modulesDir: string): { target: string; modFile: string; version: string } {
   const version = readModuleVersion(moduleSource);

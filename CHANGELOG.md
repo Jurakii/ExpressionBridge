@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- The Maya module can be installed outside Documents, for example to prefs on a synced drive. `Install.bat`,
+  `Uninstall.bat` and **Maya: Install Bridge into Maya** now show the folder and let you change it. The default is
+  unchanged.
+
 ## 1.0.0 - 2026-11-05
 
 First stable release: browse and edit Maya expressions from VS Code, with live two-way sync, Maya's errors in the

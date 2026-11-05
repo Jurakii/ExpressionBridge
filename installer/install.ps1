@@ -14,6 +14,8 @@
     .\install.ps1 -Uninstall
 .EXAMPLE
     .\install.ps1 -SkipVSCode -ModulesDir D:\pipeline\maya\modules
+.EXAMPLE
+    .\install.ps1 -Ask
 #>
 [CmdletBinding()]
 param(
@@ -22,6 +24,8 @@ param(
     [switch]$SkipVSCode,
     # Defaults to $env:MAYA_APP_DIR\modules, else <Documents>\maya\modules (Maya's own default).
     [string]$ModulesDir,
+    # Show the modules folder and offer to change it. Install.bat and Uninstall.bat pass this when double-clicked.
+    [switch]$Ask,
     # Path to VS Code's `code` command; found automatically when omitted.
     [string]$CodeCli
 )
@@ -44,6 +48,25 @@ function Get-ModulesDir {
     # MyDocuments follows a redirected Documents folder (e.g. OneDrive), like Maya does.
     $docs = [Environment]::GetFolderPath('MyDocuments')
     return (Join-Path $docs 'maya\modules')
+}
+
+# Accepts a prefs folder (...\2025\prefs), its parent (...\2025 or ...\maya) or a modules folder.
+function Resolve-ModulesDir([string]$Folder) {
+    $Folder = $Folder.Trim().Trim('"').TrimEnd('\', '/')
+    if (-not [IO.Path]::IsPathRooted($Folder)) { throw "Enter the full path of the folder, not '$Folder'." }
+    $leaf = Split-Path -Leaf $Folder
+    if ($leaf -eq 'modules') { return $Folder }
+    if ($leaf -eq 'prefs') { return (Join-Path (Split-Path -Parent $Folder) 'modules') }
+    return (Join-Path $Folder 'modules')
+}
+
+function Request-ModulesDir([string]$Default) {
+    Write-Host "Maya modules folder: $Default"
+    Write-Host 'Press Enter to use it, or enter your Maya prefs folder if it is somewhere else,'
+    Write-Host 'such as X:\Sync\maya\2025\prefs.'
+    $answer = Read-Host 'Folder'
+    if ([string]::IsNullOrWhiteSpace($answer)) { return $Default }
+    return (Resolve-ModulesDir $answer)
 }
 
 function Get-Version {
@@ -140,6 +163,7 @@ function Uninstall-VSCodeExtension {
 }
 
 $dir = Get-ModulesDir
+if ($Ask -and -not $SkipMaya -and -not $ModulesDir) { $dir = Request-ModulesDir $dir }
 if ($Uninstall) {
     if (-not $SkipMaya) { Uninstall-MayaModule $dir }
     if (-not $SkipVSCode) { Uninstall-VSCodeExtension }
