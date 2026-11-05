@@ -107,17 +107,24 @@ footer { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--line
       installs the extension into VS Code.</li>
     <li>Start Maya, or restart it if it was open. An <strong>Expression Bridge</strong> menu appears in the main menu
       bar.</li>
-    <li>In VS Code, click <strong>Restart Extensions</strong> if prompted, then click the <strong>M</strong> icon in the
-      activity bar.</li>
+    <li>In VS Code, click <strong>Restart Extensions</strong> if prompted, then click the <strong>Expression Bridge</strong>
+      icon in the activity bar.</li>
   </ol>
   <p>You can delete the unzipped folder afterwards. Everything is copied into place.</p>
+
+  <h3 id="folder">If your Maya prefs aren't in Documents</h3>
+  <p><code>Install.bat</code> shows the Maya modules folder it will use. Press Enter to keep it. If your prefs are
+    somewhere else, such as a synced drive, enter that folder instead, for example
+    <code>X:\Sync\maya\2025\prefs</code>. The module goes into the <code>modules</code> folder beside it, which only
+    that Maya version reads, so run <code>Install.bat</code> once for each version.</p>
 
   <h3>Other ways to install</h3>
   <ul>
     <li><strong>From VS Code alone:</strong> install the VSIX, then run <strong>Maya: Install Bridge into Maya</strong>
-      from the Command Palette and restart Maya. <strong>Maya: Uninstall Bridge from Maya</strong> removes it again.</li>
+      from the Command Palette and restart Maya. Click <strong>Choose Folder...</strong> to pick your prefs folder if it
+      isn't the one shown. <strong>Maya: Uninstall Bridge from Maya</strong> removes it again.</li>
     <li><strong>Maya only, without a restart:</strong> drag <code>maya\drag_and_drop_install.py</code> into a Maya
-      viewport. It installs and starts the bridge right away.</li>
+      viewport. It installs and starts the bridge right away, and finds the folder by asking Maya.</li>
     <li id="vsix"><strong>VS Code only:</strong> open Extensions, click <strong>...</strong> at the top right, choose
       <strong>Install from VSIX...</strong>, and pick <code>vscode\expression-bridge-1.0.0.vsix</code>.</li>
     <li><strong>From PowerShell, with options:</strong>
@@ -131,7 +138,8 @@ footer { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--line
 
   <h3>Uninstall</h3>
   <p>Double-click <code>Uninstall.bat</code>, or run <code>installer\install.ps1 -Uninstall</code>. This removes the
-    module and the <code>.mod</code> file from Maya's modules folder, and the extension from VS Code.</p>
+    module and the <code>.mod</code> file from Maya's modules folder, and the extension from VS Code. If you installed
+    to another folder, enter it when asked.</p>
 
   <h3>Check the download</h3>
   <p>In PowerShell, run <code>Get-FileHash ExpressionBridge-1.0.0.zip -Algorithm SHA256</code> and compare the result
@@ -141,7 +149,7 @@ footer { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--line
 
   <h3>Edit an expression</h3>
   <ol>
-    <li>Click the <strong>M</strong> icon in VS Code. <strong>Objects</strong> lists every object that has
+    <li>Click the <strong>Expression Bridge</strong> icon in VS Code. <strong>Objects</strong> lists every object that has
       expressions.</li>
     <li>Click an expression and edit it.</li>
     <li>Press <kbd>Ctrl+S</kbd>. Maya updates.</li>
@@ -224,7 +232,9 @@ footer { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--line
     seconds. Click the status bar item to retry now and see the error.</p>
 
   <h3>There's no Expression Bridge menu in Maya</h3>
-  <p>Check that <code>Documents\maya\modules\ExpressionBridge.mod</code> exists, then restart Maya. In Maya's Script
+  <p>Check that <code>ExpressionBridge.mod</code> exists in your modules folder, normally
+    <code>Documents\maya\modules</code>, then restart Maya. If your prefs are on another drive, see
+    <a href="#folder">If your Maya prefs aren't in Documents</a>. In Maya's Script
     Editor, <code>cmds.moduleInfo(listModules=True)</code> should include <code>ExpressionBridge</code>.</p>
 
   <h3>Two copies of Maya are open</h3>
