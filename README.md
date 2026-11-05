@@ -1,3 +1,5 @@
+<img src="vscode/media/icon.svg" width="64" height="64" alt="">
+
 # Maya ↔ VS Code Expression Bridge
 
 Edit Maya expressions in VS Code. Saving updates Maya, edits in Maya appear in VS Code, and Maya's errors show
