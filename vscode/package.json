@@ -8,7 +8,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/Jurakii/ExpressionPro.git"
+    "url": "https://github.com/Jurakii/ExpressionBridge.git"
   },
   "engines": {
     "vscode": "^1.90.0"
